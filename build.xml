@@ -1,0 +1,300 @@
+<project name="Haushaltsbuch" default="macosx" basedir=".">
+	
+	<property name="src" value="src" />
+	<property name="lib" location="lib" />
+	<property name="res" value="res" />
+	<property name="dest" value="build" />
+	<property name="resources" value="resources" />
+	<property name="classes" value="${dest}/classes" />
+	<property name="jar" value="${dest}/jar" />
+	<property name="tmp" value="${dest}/tmp" />
+	
+	<!-- Set this property value to your application name. Do not include the .app extension -->
+	<property name="app.name" value="Haushaltsbuch"/>
+	
+	<property name="version.num" value="1.0"/>
+	<buildnumber file="build.num"/>
+	
+	<!-- Classpath for ant-build. -->
+	<path id="classpath">
+		<fileset dir="${lib}" includes="**/*.jar" />
+	</path>
+	
+	<path id="ant.classpath">
+		<fileset dir="${resources}" includes="**/*.jar" />
+	</path>
+	
+	<taskdef name="jarbundler" classpathref="ant.classpath" classname="net.sourceforge.jarbundler.JarBundler"/>
+	<taskdef name="appbundler" classpathref="ant.classpath" classname="com.oracle.appbundler.AppBundlerTask"/>
+	<taskdef name="xmltask" classpathref="ant.classpath" classname="com.oopsconsultancy.xmltask.ant.XmlTask"/>
+	
+	<target name="clean">
+		<delete dir="${dest}"/>
+	</target>
+	
+	<!-- Compile source. -->
+	<target name="compile" depends="clean">
+		<mkdir dir="${classes}"/>
+		<javac destdir="${classes}" debug="true" source="1.6" target="1.6" includeAntRuntime="false">
+			<src path="${src}" />
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+	
+	<target name="jar" depends="compile">
+        <mkdir dir="${jar}"/>
+		
+		<copy todir="${classes}">
+			<fileset dir="${res}">
+				<include name="**/images/*.png" />
+				<exclude name="**CVS**" />
+			</fileset>
+			<fileset file="${res}/haushb.ddl" />
+		</copy>
+		
+        <jar destfile="${jar}/haushaltsbuch.jar" basedir="${classes}">
+        	<manifest>
+                <attribute name="Implementation-Version" value="${version.num} (Build ${build.number})"/>
+            </manifest>
+        </jar>
+    </target>
+
+	<target name="macosx" description="Create an .app package for MacOSX" depends="jar">
+	
+	    <!-- Set this property value to where your JavaApplicationStub is located -->
+	    <property name="macosx.stubfile" value="${resources}/JavaApplicationStub"/>
+		<property name="macosx.appfile" value="${resources}/Haushaltsbuch"/>
+		
+		<!-- This property is set to the path where are the Sparkle framework will be stored inside the package. You should not need to change it -->
+		<property name="sparkle.path" value="Contents/Frameworks/Sparkle.framework"/>
+	
+	    <!-- Delete the old .app if it exists -->
+	    <delete dir="${dest}/${app.name}.app" quiet="yes" failonerror="false"/>
+		
+		<mkdir dir="${tmp}"/>
+		
+		<copy todir="${tmp}">
+			<fileset dir="${lib}" includes="*.jar" />
+			<fileset dir="${lib}" includes="*.dylib" />
+			<fileset dir="${jar}" includes="*.jar" />
+		</copy>
+		
+		<appbundler	outputdirectory="${dest}"
+					name="${app.name}"
+					displayname="${app.name}"
+					identifier="haushaltsbuch"
+					icon="${resources}/logo.icns"
+					shortversion="${version.num}"
+					mainclassname="haushaltsbuch.Haushaltsbuch">
+					
+			<classpath dir="${tmp}"/>
+			<option value="-Djava.library.path=$APP_ROOT/Contents/Java/"/>
+			<option value="-Dapple.laf.useScreenMenuBar=true"/>
+			<option value="-XstartOnFirstThread"/>
+		</appbundler>
+		
+		<delete dir="${tmp}"/>
+		
+		<!-- The Info.plist file inside the .app package must be updated with several Sparkle properties. Set the SUFeedURL property to the URL where your appcast XML file is located. -->
+		<replace file="${dest}/${app.name}.app/Contents/Info.plist">
+			<replacetoken><![CDATA[<key>CFBundleDevelopmentRegion</key>]]></replacetoken>
+			<replacevalue><![CDATA[<key>SUScheduledCheckInterval</key>
+<string>86400</string>
+<key>SUPublicDSAKeyFile</key>
+<string>dsa_pub.pem</string>
+<key>SUFeedURL</key>
+<string>http://derkanzler.ath.cx/update.xml</string>
+<key>SUShowReleaseNotes</key>
+<true/>
+<key>SUEnableSystemProfiling</key>
+<false/>
+<key>SUAllowsAutomaticUpdates</key>
+<false/>
+<key>SUEnableAutomaticChecks</key>
+<false/>
+<key>CFBundleDevelopmentRegion</key>]]></replacevalue>
+		</replace>
+		
+		<replace file="${dest}/${app.name}.app/Contents/Info.plist">
+			<replacetoken><![CDATA[<string>JavaAppLauncher</string>]]></replacetoken>
+			<replacevalue><![CDATA[<string>Haushaltsbuch</string>]]></replacevalue>
+		</replace>
+		
+		<xmltask source="${dest}/${app.name}.app/Contents/Info.plist" dest="${dest}/${app.name}.app/Contents/Info.plist">
+	    	<replace path="//key[text() = 'CFBundleVersion']/following-sibling::string[1]/text()" withText="${build.number}"/>
+		</xmltask>
+		
+		<replace file="${dest}/${app.name}.app/Contents/Info.plist">
+			<replacetoken><![CDATA[</dict>
+</plist>]]></replacetoken>
+			<replacevalue><![CDATA[<key>Java</key>
+<dict>
+<key>MainClass</key>
+<string>haushaltsbuch.Haushaltsbuch</string>
+<key>JVMVersion</key>
+<string>1.6+</string>
+<key>ClassPath</key>
+<array>
+<string>$APP_PACKAGE/Contents/Java/h2.jar</string>
+<string>$APP_PACKAGE/Contents/Java/haushaltsbuch.jar</string>
+<string>$APP_PACKAGE/Contents/Java/jcommon.jar</string>
+<string>$APP_PACKAGE/Contents/Java/jfreechart-experimental.jar</string>
+<string>$APP_PACKAGE/Contents/Java/jfreechart-swt.jar</string>
+<string>$APP_PACKAGE/Contents/Java/jfreechart.jar</string>
+<string>$APP_PACKAGE/Contents/Java/libsparkle_init.dylib</string>
+<string>$APP_PACKAGE/Contents/Java/org.eclipse.core.commands.jar</string>
+<string>$APP_PACKAGE/Contents/Java/org.eclipse.equinox.common.jar</string>
+<string>$APP_PACKAGE/Contents/Java/org.eclipse.jface.jar</string>
+<string>$APP_PACKAGE/Contents/Java/org.eclipse.nebula.cwt.jar</string>
+<string>$APP_PACKAGE/Contents/Java/org.eclipse.nebula.widgets.cdatetime.jar</string>
+<string>$APP_PACKAGE/Contents/Java/org.eclipse.nebula.widgets.formattedtext.jar</string>
+<string>$APP_PACKAGE/Contents/Java/org.eclipse.osgi.jar</string>
+<string>$APP_PACKAGE/Contents/Java/swt.jar</string>
+<string>$APP_PACKAGE/Contents/Java/swtgraphics2d.jar</string>
+</array>
+<key>WorkingDirectory</key>
+<string>$APP_PACKAGE/Contents/Resources/Java</string>
+<key>StartOnMainThread</key>
+<true/>
+<key>Properties</key>
+<dict>
+<key>java.library.path</key>
+<string>$APP_PACKAGE/Contents/Java</string>
+</dict>
+</dict>
+</dict>
+</plist>]]></replacevalue>
+		</replace>
+		
+		<mkdir dir="${dest}/${app.name}.app/Contents/Resources/en.lproj"/>
+		<mkdir dir="${dest}/${app.name}.app/Contents/Resources/de.lproj"/>
+		
+		<copy file="${macosx.stubfile}" todir="${dest}/${app.name}.app/Contents/MacOs" />
+		<chmod file="${dest}/${app.name}.app/Contents/MacOs/JavaApplicationStub" perm="+x" />
+		
+		<copy file="${macosx.appfile}" todir="${dest}/${app.name}.app/Contents/MacOs" />
+		<chmod file="${dest}/${app.name}.app/Contents/MacOs/Haushaltsbuch" perm="+x" />
+		
+		<exec executable="/usr/bin/codesign" dir="${dest}" failonerror="false" os="Mac OS X">
+			<arg line="-s - --force ${app.name}.app" />
+		</exec>
+		
+		<!-- The Sparkle Framework must also be copied in the application package. -->
+		<mkdir dir="${dest}/${app.name}.app/Contents/Frameworks"/>
+	    <unzip src="${resources}/Sparkle.framework.zip" dest="${dest}/${app.name}.app/Contents/Frameworks"/>
+		
+		<copy todir="${dest}/${app.name}.app/Contents/Resources/">
+			<fileset dir="${resources}" includes="dsa_pub.pem" />
+		</copy>
+		
+		<!-- The Ant unzip task does not preserve symlinks, so we recreate them. -->
+		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Versions/Current" resource="./A"/>
+	    <symlink link="${dest}/${app.name}.app/${sparkle.path}/Headers" resource="./Versions/Current/Headers"/>
+	    <symlink link="${dest}/${app.name}.app/${sparkle.path}/Resources" resource="./Versions/Current/Resources"/>
+	    <symlink link="${dest}/${app.name}.app/${sparkle.path}/Sparkle" resource="./Versions/Current/Sparkle"/>
+
+	    <!-- Restore the file permissions to the Sparke relaunch tool. -->
+		<chmod file="${dest}/${app.name}.app/${sparkle.path}/Resources/relaunch" perm="ugo+rx" />
+	</target>
+	
+	<!-- Create a DMG - This only works on MacOSX (requires hdiutil) -->
+	<target name="dmg" description="Create a DMG package for MacOSX (only works on MacOSX)" depends="macosx">
+		
+		<!-- Set this property value to a directory where you can mount temporarily your images, for example /tmp -->
+	    <property name="mountdir" value="/tmp"/>
+		
+		<tstamp>
+			<format property="TODAY_US" pattern="MM/dd/yyyy hh:mm aa" locale="en,US"/>
+		</tstamp>
+
+	    <!-- Delete previously created DMG -->
+	    <delete file="${app.name}.dmg}" quiet="yes" failonerror="false"/>
+
+	    <!-- Create a temporary Disk Image -->
+	    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+	      <arg value="create"/>
+	      <arg value="-srcfolder"/>
+	      <arg value="${dest}/${app.name}.app"/>
+	      <arg value="-volname"/>
+	      <arg value="${app.name}"/>
+	      <arg value="-ov"/>
+	      <arg value="${dest}/${app.name}-tmp.dmg"/>
+	      <arg value="-format"/>
+	      <arg value="UDRW"/>
+	    </exec>
+
+		<!-- Attach the temporary image -->
+	    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+	      <arg value="attach"/>
+	      <arg value="${dest}/${app.name}-tmp.dmg"/>
+	      <arg value="-mountroot"/>
+	      <arg value="${mountdir}/"/>
+	    </exec>
+
+	    <!-- Copy the background, the volume icon and DS_Store files -->
+	    <mkdir dir="${mountdir}/${app.name}/.background"/>
+	    <copy file="${resources}/background.png"
+	          tofile="${mountdir}/${app.name}/.background/background.png"
+	          overwrite="true"/>
+	    <copy file="${resources}/VolumeIcon.icns"
+	          tofile="${mountdir}/${app.name}/.VolumeIcon.icns"
+	          overwrite="true"/>
+	    <copy file="${resources}/DS_Store"
+	          tofile="${mountdir}/${app.name}/.DS_Store"
+	          overwrite="true"/>
+		
+	    <!-- Indicate that we want a custom icon -->
+		<exec executable="/usr/bin/SetFile" os="Mac OS X">
+	      <arg value="-a"/>
+	      <arg value="C"/>
+	      <arg value="${mountdir}/${app.name}"/>
+	    </exec>
+		
+	    <!-- Add a symbolic link to the Applications directory -->
+	    <symlink link="${mountdir}/${app.name}" resource="/Applications"/>
+
+	    <!-- Detach the temporary image -->
+	    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+	      <arg value="detach"/>
+	      <arg value="${mountdir}/${app.name}"/>
+	    </exec>
+
+	    <!-- Compress it to a new image -->
+	    <exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+	      <arg value="convert"/>
+	      <arg value="${dest}/${app.name}-tmp.dmg"/>
+	      <arg value="-format"/>
+	      <arg value="UDZO"/>
+	      <arg value="-o"/>
+	      <arg value="${dest}/${app.name}.dmg"/>
+	    </exec>
+		
+		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
+	      <arg value="internet-enable"/>
+	      <arg value="-yes"/>
+	      <arg value="${dest}/${app.name}.dmg"/>
+	    </exec>
+
+	    <!-- Delete the temporary image -->
+	    <delete file="${dest}/${app.name}-tmp.dmg" quiet="yes" failonerror="false"/>
+		
+		<!-- Sign the image -->
+		<exec dir="." executable="ruby" outputproperty="key">
+		    <arg value="${resources}/Sparkle/sign_update.rb"/>
+			<arg value="${dest}/${app.name}.dmg"/>
+			<arg value="${resources}/dsa_priv.pem"/>
+		</exec>
+		
+		<length file="${dest}/${app.name}.dmg" property="app.size" />
+		
+	    <xmltask source="${resources}/update.xml" dest="${dest}/update.xml">
+	    	<replace path="/rss/channel/item/title/text()" withText="Haushaltsbuch ${version.num} (Build ${build.number})"/>
+	    	<replace path="/rss/channel/item/pubDate/text()" withText="${TODAY_US}"/>
+	    	<replace path="/rss/channel/item/enclosure/@sparkle:dsaSignature" withText="${key}"/>
+	    	<replace path="/rss/channel/item/enclosure/@sparkle:version" withText="${build.number}"/>
+	    	<replace path="/rss/channel/item/enclosure/@sparkle:shortVersionString" withText="${version.num}"/>
+	    	<replace path="/rss/channel/item/enclosure/@length" withText="${app.size}"/>
+		</xmltask>
+	</target>
+
+</project>

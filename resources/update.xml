@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+	<channel>
+		<title>Haushaltsbuch</title>
+		<link>http://derkanzler.ath.cx/update.xml</link>
+		<description>Haushaltsbuch Max OS X</description>
+		<language>en</language>
+		<copyright>Copyright 1995-2013 Helmut &amp; Peter Kanzler</copyright>
+		<item>
+			<title>Haushaltsbuch 1.0 (Build 70)</title>
+			<pubDate>09/26/2010 11:34 AM</pubDate>
+			<enclosure
+				length="8346079"
+				sparkle:dsaSignature="MCwCFFH8o0c7yzbvmOTiZu6V2Gh2V5BjAhQYu/lYzz7DxAIY3Yfp7U7/Sw6+qQ=="
+				sparkle:shortVersionString="1.0"
+				sparkle:version="70"
+				type="application/octet-stream"
+				url="http://derkanzler.ath.cx/Haushaltsbuch.dmg"/>
+			<sparkle:releaseNotesLink>http://derkanzler.ath.cx/test.html</sparkle:releaseNotesLink>
+			<sparkle:minimumSystemVersion>10.5.0</sparkle:minimumSystemVersion>
+		</item>
+	</channel>
+</rss>

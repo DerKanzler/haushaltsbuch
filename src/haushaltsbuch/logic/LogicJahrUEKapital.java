@@ -1,0 +1,161 @@
+package haushaltsbuch.logic;
+
+import haushaltsbuch.bean.Konto;
+import haushaltsbuch.bean.Kontostand;
+import haushaltsbuch.bean.util.KapitalCollection;
+import haushaltsbuch.bean.util.KontoCollection;
+import haushaltsbuch.dao.KontoDAO;
+import haushaltsbuch.dao.KontostandDAO;
+import haushaltsbuch.util.Tools;
+
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Vector;
+import java.util.Map.Entry;
+
+public class LogicJahrUEKapital {
+	
+	private Map<Konto, KontoCollection> konten = Collections.synchronizedMap(new HashMap<Konto, KontoCollection>());
+	
+	private Integer year;
+	
+	private BigDecimal dispBeginn = new BigDecimal(0);
+	private BigDecimal dispEnd = new BigDecimal(0);
+	private BigDecimal lockBeginn = new BigDecimal(0);
+	private BigDecimal lockEnd = new BigDecimal(0);
+	private BigDecimal dispCurrent, lockCurrent;
+	
+	public LogicJahrUEKapital(Integer year) {
+		this.year = year;
+		for (int i=-1; i<12; i++) {
+			GregorianCalendar gc = new GregorianCalendar();
+			gc.clear();
+			if (i==-1) gc.set(year+i, GregorianCalendar.DECEMBER, 1);
+			else gc.set(year, i, 1);
+			Vector<Kontostand> month = KontostandDAO.instance().getKontostaende(gc.getTime());
+			for (Kontostand kst: month) {
+				if (!konten.containsKey(kst.getKonto())) {
+					KontoCollection k = new KontoCollection(year, kst.getKonto());
+					k.addKontostand(kst);
+					konten.put(kst.getKonto(), k);
+				}
+				else konten.get(kst.getKonto()).addKontostand(kst);
+			}
+		}
+		Iterator<Map.Entry<Konto, KontoCollection>> i = konten.entrySet().iterator();
+		while (i.hasNext()) {
+		    Entry<Konto, KontoCollection> e = i.next();
+		    if (isEligable(e, year) || e.getKey().isValid() || e.getValue().getYearIn().compareTo(new BigDecimal(0)) != 0) {
+				if (e.getKey().isDisposable()) {
+					dispBeginn = dispBeginn.add(e.getValue().getYearIn());
+					dispEnd = dispEnd.add(e.getValue().getYearOut());
+				}
+				else {
+					lockBeginn = lockBeginn.add(e.getValue().getYearIn());
+					lockEnd = lockEnd.add(e.getValue().getYearOut());
+				}
+			}
+			else i.remove();
+		}
+	}
+	
+	// Kontrolliert ob es einen Saldo in den 12 Monaten gegeben hat
+	// Bewegungen im Jahr
+	private Boolean isEligable(Entry<Konto, KontoCollection> e, Integer year) {
+		Boolean eligable = false;
+		
+		KontoCollection k = e.getValue();
+		for (Kontostand kst: k.getKontostaende()) {
+			if (kst.getKtostsaldo().compareTo(new BigDecimal(0)) != 0) {
+				eligable = true;
+			}			
+		}
+		return eligable;
+	}
+	
+	public BigDecimal getDispBeginn() {
+		return dispBeginn;
+	}
+	
+	public BigDecimal getLockBeginn() {
+		return lockBeginn;
+	}
+	
+	public BigDecimal getSumBeginn() {
+		return dispBeginn.add(lockBeginn);
+	}
+	
+	public BigDecimal getDispEnd() {
+		return dispEnd;
+	}
+	
+	public BigDecimal getLockEnd() {
+		return lockEnd;
+	}
+	
+	public BigDecimal getSumEnd() {
+		return dispEnd.add(lockEnd);
+	}
+	
+	public BigDecimal getDispDiff() {
+		if (Tools.getYear(Tools.getLastDate()).equals(year)) {
+			return getDispCurrent().subtract(getDispBeginn());
+		}
+		else return getDispEnd().subtract(getDispBeginn());
+	}
+	
+	public BigDecimal getLockDiff() {
+		if (Tools.getYear(Tools.getLastDate()).equals(year)) {
+			return getLockCurrent().subtract(getLockBeginn());
+		}
+		else return getLockEnd().subtract(getLockBeginn());
+	}
+	
+	public BigDecimal getSumDiff() {
+		if (Tools.getYear(Tools.getLastDate()).equals(year)) {
+			return getSumCurrent().subtract(getSumBeginn());
+		}
+		else return getSumEnd().subtract(getSumBeginn());
+	}
+	
+	public BigDecimal getDispCurrent() {
+		if (dispCurrent == null) {
+			dispCurrent = new BigDecimal(0);
+			for (Konto k: KontoDAO.instance().getAll()) {
+				if (k.isValid() && k.isDisposable()) dispCurrent = dispCurrent.add(k.getSaldo());
+			}
+		}
+		return dispCurrent;
+	}
+	
+	public BigDecimal getLockCurrent() {
+		if (lockCurrent == null) {
+			lockCurrent = new BigDecimal(0);
+			for (Konto k: KontoDAO.instance().getAll()) {
+				if (k.isValid() && !k.isDisposable()) lockCurrent = lockCurrent.add(k.getSaldo());
+			}
+		}
+		return lockCurrent;
+	}
+	
+	public BigDecimal getSumCurrent() {
+		return getDispCurrent().add(getLockCurrent());
+	}
+	
+	public Collection<KontoCollection> getKonten() {
+		return this.konten.values();
+	}
+	
+	public KapitalCollection getDetailedData(Integer view) {
+		KapitalCollection kc = new KapitalCollection(year, konten, view);
+		return kc;		
+	}
+	
+	
+	
+}

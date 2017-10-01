@@ -1,0 +1,8 @@
+Launcher.c kompilieren:
+gcc -o Haushaltsbuch -framework CoreServices -arch i386 -arch x86_64 -arch ppc -mmacosx-version-min=10.5 Launcher.c
+
+Unter Umständen vorher XCode CLI Developer Tools installieren:
+xcode-select --install
+
+Quelle:
+http://lists.apple.com/archives/java-dev/2012/Dec/msg00033.html

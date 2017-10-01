@@ -1,0 +1,116 @@
+D/Configurations////
+/Info.plist/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/License.txt/1.1/Sun Sep 26 09:40:37 2010//
+/Makefile/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/NTSynchronousTask.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/NTSynchronousTask.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/README.markdown/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/Relaunch Tool-Info.plist/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAppcast.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAppcast.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAppcastItem.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAppcastItem.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAutomaticUpdateAlert.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAutomaticUpdateAlert.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAutomaticUpdateDriver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUAutomaticUpdateDriver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBasicUpdateDriver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBasicUpdateDriver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBinaryDeltaApply.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBinaryDeltaApply.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBinaryDeltaCommon.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBinaryDeltaCommon.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBinaryDeltaTool.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBinaryDeltaUnarchiver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUBinaryDeltaUnarchiver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUConstants.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUConstants.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUDSAVerifier.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUDSAVerifier.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUDiskImageUnarchiver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUDiskImageUnarchiver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUHost.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUHost.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUInstaller.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUInstaller.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUModelTranslation.plist/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPackageInstaller.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPackageInstaller.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPipedUnarchiver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPipedUnarchiver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPlainInstaller.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPlainInstaller.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPlainInstallerInternals.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUPlainInstallerInternals.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUProbingUpdateDriver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUProbingUpdateDriver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUScheduledUpdateDriver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUScheduledUpdateDriver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUStandardVersionComparator.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUStandardVersionComparator.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+D/SUStatus.nib////
+/SUStatusController.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUStatusController.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUSystemProfiler.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUSystemProfiler.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUIBasedUpdateDriver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUIBasedUpdateDriver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUnarchiver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUnarchiver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUnarchiver_Private.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUnarchiver_Private.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdateAlert.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdateAlert.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdateDriver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdateDriver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdatePermissionPrompt.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdatePermissionPrompt.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdater.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUpdater.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUserInitiatedUpdateDriver.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUUserInitiatedUpdateDriver.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUVersionComparisonProtocol.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUWindowController.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/SUWindowController.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/Sample Appcast.xml/1.1/Sun Sep 26 09:40:37 2010//
+/Sparkle.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/Sparkle.icns/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/Sparkle.pch/1.1/Sun Sep 26 09:40:37 2010/-kb/
+D/Sparkle.xcodeproj////
+D/Test Application////
+D/Tests////
+/bsdiff.c/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/bspatch.c/1.1/Sun Sep 26 09:40:37 2010/-kb/
+/bspatch.h/1.1/Sun Sep 26 09:40:37 2010/-kb/
+D/ca.lproj////
+D/cs.lproj////
+D/cy.lproj////
+D/da.lproj////
+D/de.lproj////
+D/el.lproj////
+D/en.lproj////
+D/es.lproj////
+D/fi.lproj////
+D/fr.lproj////
+/generate_keys.rb/1.1/Sun Sep 26 09:40:37 2010/-kb/
+D/he.lproj////
+D/hu.lproj////
+D/id.lproj////
+D/is.lproj////
+D/it.lproj////
+D/ja.lproj////
+D/ko.lproj////
+D/nl.lproj////
+D/no.lproj////
+D/pl.lproj////
+D/pt_BR.lproj////
+D/pt_PT.lproj////
+/relaunch.m/1.1/Sun Sep 26 09:40:37 2010/-kb/
+D/ru.lproj////
+/sign_update.rb/1.1/Sun Sep 26 09:40:37 2010/-kb/
+D/sk.lproj////
+D/sv.lproj////
+D/th.lproj////
+D/tr.lproj////
+D/zh_CN.lproj////
+D/zh_TW.lproj////
