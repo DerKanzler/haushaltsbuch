@@ -1,83 +1,81 @@
 package haushaltsbuch.dao;
 
-import haushaltsbuch.bean.Konto;
-import haushaltsbuch.db.KontoDB;
-
 import java.util.HashMap;
 import java.util.Vector;
 
-public class KontoDAO{
-	
+import haushaltsbuch.bean.Konto;
+import haushaltsbuch.db.KontoDB;
+
+public class KontoDAO {
+
 	private KontoDB db = new KontoDB();
-	private static KontoDAO logic;
-	private Vector<Konto> kontenVector;
-	private HashMap<Integer, Konto> kontenMap;
-	
-	private KontoDAO() {}
-	
-	public static KontoDAO instance() {
-		if (logic == null) {
-			logic = new KontoDAO();
-		}
-		return logic;
+	private static KontoDAO instance;
+	private Vector<Konto> kontoList;
+	private HashMap<Integer, Konto> kontoMap;
+
+	private KontoDAO() {
+		// nothing to do
 	}
-	
+
+	public static KontoDAO instance() {
+		if (instance == null) {
+			instance = new KontoDAO();
+		}
+		return instance;
+	}
+
 	public Konto getKonto(Integer i) {
 		return getMap().get(i);
 	}
-	
+
 	public Vector<Konto> getAll() {
 		try {
-			if (kontenVector == null) {
-				kontenVector = db.getAll();
-			}			
-			return kontenVector;
-		}
-		catch (Exception e) {
+			if (kontoList == null) {
+				kontoList = db.getAll();
+			}
+			return kontoList;
+		} catch (Exception e) {
 			return new Vector<Konto>();
 		}
 	}
-	
+
 	public Vector<Konto> getAllValid() {
 		Vector<Konto> konten = new Vector<Konto>();
-		for (Konto k: getAll()) {
+		for (Konto k : getAll()) {
 			if (k.isValid()) {
 				konten.addElement(k);
 			}
 		}
 		return konten;
 	}
-	
+
 	public HashMap<Integer, Konto> getMap() {
-		if (kontenMap == null) {
-			kontenMap = new HashMap<Integer, Konto>();
-			for (Konto k: getAll()) {
-				kontenMap.put(k.getKonto(), k);
+		if (kontoMap == null) {
+			kontoMap = new HashMap<Integer, Konto>();
+			for (Konto k : getAll()) {
+				kontoMap.put(k.getKonto(), k);
 			}
-		}			
-		return kontenMap;
+		}
+		return kontoMap;
 	}
-	
-	public Boolean saveOrUpdate(Konto k) throws RuntimeException {
+
+	public Boolean saveOrUpdate(Konto k) {
 		try {
 			if (k.getKonto() == null) {
 				db.save(k);
-				clear();
-				return true;
-			}
-			else {
+			} else {
 				db.update(k);
-				return true;
 			}
-		}
-		catch (Exception e) {
+			clear();
+			return true;
+		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
-	
+
 	public void clear() {
-		kontenVector = null;
-		kontenMap = null;
+		kontoList = null;
+		kontoMap = null;
 		BenutzerDAO.instance().clear();
 	}
 

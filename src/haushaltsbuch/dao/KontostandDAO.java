@@ -1,64 +1,56 @@
 package haushaltsbuch.dao;
 
-import haushaltsbuch.bean.Kontostand;
-import haushaltsbuch.db.KontostandDB;
-
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Vector;
 
+import haushaltsbuch.bean.Kontostand;
+import haushaltsbuch.db.KontostandDB;
+
 public class KontostandDAO {
-	
+
 	private KontostandDB db = new KontostandDB();
-	private static KontostandDAO logic;
-	private HashMap<Date, Vector<Kontostand>> kontostandMap = new HashMap<Date, Vector<Kontostand>>();
-	
-	private KontostandDAO() {}
-	
+	private static KontostandDAO instance;
+	private HashMap<LocalDate, Vector<Kontostand>> kontostandMap = new HashMap<LocalDate, Vector<Kontostand>>();
+
+	private KontostandDAO() {
+	}
+
 	public static KontostandDAO instance() {
-		if (logic == null) {
-			logic = new KontostandDAO();
+		if (instance == null) {
+			instance = new KontostandDAO();
 		}
-		return logic;
+		return instance;
 	}
-	
-	public Vector<Kontostand> getKontostaende(Date date) {
-		GregorianCalendar gc = new GregorianCalendar();
-		gc.setTime(date);
-		gc.clear(GregorianCalendar.MILLISECOND);
-		gc.clear(GregorianCalendar.SECOND);
-		gc.clear(GregorianCalendar.MINUTE);
-		gc.clear(GregorianCalendar.HOUR);
-		gc.set(GregorianCalendar.DAY_OF_MONTH, 1);
-		if (!kontostandMap.containsKey(gc.getTime())) {
+
+	public Vector<Kontostand> getKontostaende(LocalDate date) {
+		date = date.withDayOfMonth(1);
+		if (kontostandMap.containsKey(date) == false) {
 			try {
-				kontostandMap.put(gc.getTime(), db.getKontostaendeMonat(new java.sql.Date(gc.getTime().getTime())));
+				kontostandMap.put(date, db.getKontostaendeMonat(date));
+			} catch (Exception e) {
+				// nothing to do
 			}
-			catch (Exception e) {}			
 		}
-		return kontostandMap.get(gc.getTime());		
+		return kontostandMap.get(date);
 	}
-	
+
 	public Boolean saveOrUpdate(Kontostand k) {
 		try {
 			if (k.getKtost() == null) {
 				db.save(k);
-				clear();
-				return true;
-			}
-			else {
+			} else {
 				db.update(k);
-				return true;
 			}
-		}
-		catch (Exception e) {
+			clear();
+			return true;
+		} catch (Exception e) {
 			return false;
 		}
 	}
 
 	public void clear() {
-		kontostandMap = new HashMap<Date, Vector<Kontostand>>();
+		kontostandMap = new HashMap<LocalDate, Vector<Kontostand>>();
 	}
 
 }

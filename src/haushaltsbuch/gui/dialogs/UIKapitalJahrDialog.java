@@ -1,12 +1,7 @@
 package haushaltsbuch.gui.dialogs;
 
-import haushaltsbuch.bean.util.KapitalCollection;
-import haushaltsbuch.util.Tools;
-
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,11 +14,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TableItem;
 import org.jfree.chart.axis.DateAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.time.Month;
 import org.jfree.data.time.TimeSeries;
 import org.jfree.data.time.TimeSeriesCollection;
+
+import haushaltsbuch.bean.util.KapitalCollection;
+import haushaltsbuch.util.Tools;
 
 public class UIKapitalJahrDialog extends UIKapitalDialog {
 
@@ -33,7 +29,6 @@ public class UIKapitalJahrDialog extends UIKapitalDialog {
 	public final static int KAPITAL_VERFUEGBAR = 0;
 	public final static int KAPITAL_GESPERRT = 1;
 	public final static int KAPITAL_GESAMT = 2;
-	public final static int KAPITAL_ERSPARNIS = 3;
 
 	private Color green = Display.getDefault().getSystemColor(SWT.COLOR_DARK_GREEN);
 	private Color red = Display.getDefault().getSystemColor(SWT.COLOR_DARK_RED);
@@ -66,44 +61,33 @@ public class UIKapitalJahrDialog extends UIKapitalDialog {
 		case (KAPITAL_GESAMT):
 			titleLabel.setText("Gesamtkapital");
 			break;
-		case (KAPITAL_ERSPARNIS):
-			titleLabel.setText("Ersparnis");
-			yearInTitle.setVisible(false);
-			yearInLabel.setVisible(false);
-			yearOutTitle.setVisible(false);
-			yearOutLabel.setVisible(false);
-			diffTitle.setText("Ersparnis");
-			XYPlot plot = (XYPlot)chart.getPlot();
-			XYLineAndShapeRenderer renderer = (XYLineAndShapeRenderer)plot.getRenderer();
-			renderer.setSeriesLinesVisible(0, false);
-			break;
 		}
-		
-		if (!view.equals(KAPITAL_ERSPARNIS)) {
-			yearInLabel.setText(Tools.printBigDecimal(kapital.getYearIn()) + " €");
-			yearOutLabel.setText(Tools.printBigDecimal(kapital.getYearOut()) + " €");
-		}
+
+		yearInLabel.setText(Tools.printBigDecimal(kapital.getYearIn()) + " €");
+		yearOutLabel.setText(Tools.printBigDecimal(kapital.getYearOut()) + " €");
 		currentLabel.setText(Tools.printBigDecimal(kapital.getCurrent()) + " €");
-		diffLabel.setText(Tools.printBigDecimal(kapital.getDiff()) + " €");		
-		if (kapital.getDiff().compareTo(new BigDecimal(0)) < 0) diffLabel.setForeground(red);
-		else if (kapital.getDiff().compareTo(new BigDecimal(0)) > 0) diffLabel.setForeground(green);
-		else diffLabel.setForeground(black);
-		
-		TableItem ti = new TableItem(table, SWT.NONE);
-		Iterator<Map.Entry<Date, BigDecimal>> i = kapital.getValues().entrySet().iterator();
-		while (i.hasNext()) {
-			Entry<Date, BigDecimal> e = i.next();
-			GregorianCalendar gc = new GregorianCalendar();
-			gc.setTime(e.getKey());
-			ti.setText(gc.get(GregorianCalendar.MONTH), Tools.printBigDecimalWithoutDigits(e.getValue()));
+		diffLabel.setText(Tools.printBigDecimal(kapital.getDiff()) + " €");
+
+		if (kapital.getDiff().compareTo(new BigDecimal(0)) < 0) {
+			diffLabel.setForeground(red);
+		} else if (kapital.getDiff().compareTo(new BigDecimal(0)) > 0) {
+			diffLabel.setForeground(green);
+		} else {
+			diffLabel.setForeground(black);
 		}
-		
-		DateAxis axis = (DateAxis)chart.getXYPlot().getDomainAxis();
-		GregorianCalendar gc = new GregorianCalendar();
-        gc.set(kapital.getYear()-1, Calendar.DECEMBER, 16);   
-        Date start = gc.getTime();
-        gc.set(kapital.getYear(), Calendar.DECEMBER, 15);   
-        axis.setRange(start, gc.getTime());
+
+		TableItem ti = new TableItem(table, SWT.NONE);
+		Iterator<Map.Entry<LocalDate, BigDecimal>> i = kapital.getValues().entrySet().iterator();
+		while (i.hasNext()) {
+			Entry<LocalDate, BigDecimal> e = i.next();
+			ti.setText(e.getKey().getMonthValue() - 1, Tools.printBigDecimalWithoutDigits(e.getValue()));
+			System.out.println(e.getKey().getMonthValue() - 1);
+		}
+
+		DateAxis axis = (DateAxis) chart.getXYPlot().getDomainAxis();
+		LocalDate start = LocalDate.of(kapital.getYear() - 1, Month.DECEMBER, 1);
+		LocalDate end = LocalDate.of(kapital.getYear(), Month.DECEMBER, 15);
+		axis.setRange(Tools.toDate(start), Tools.toDate(end));
 	}
 
 	/**
@@ -112,11 +96,16 @@ public class UIKapitalJahrDialog extends UIKapitalDialog {
 	@Override
 	protected TimeSeriesCollection createDataset() {
 		TimeSeries series = new TimeSeries("TimeSeries");
-		
-		Iterator<Map.Entry<Date, BigDecimal>> i = kapital.getValues().entrySet().iterator();
+
+		boolean yearInRelevant = false;
+		Iterator<Map.Entry<LocalDate, BigDecimal>> i = kapital.getValues().entrySet().iterator();
 		while (i.hasNext()) {
-			Entry<Date, BigDecimal> e = i.next();
-			series.add(new Month(e.getKey()), e.getValue());
+			Entry<LocalDate, BigDecimal> e = i.next();
+			series.add(new Month(e.getKey().getMonthValue(), e.getKey().getYear()), e.getValue());
+			yearInRelevant = java.time.Month.JANUARY.equals(e.getKey().getMonth()) ? true : yearInRelevant || false;
+		}
+		if (yearInRelevant) {
+			series.add(new Month(12, kapital.getYear() - 1), kapital.getYearIn());
 		}
 
 		TimeSeriesCollection dataset = new TimeSeriesCollection();

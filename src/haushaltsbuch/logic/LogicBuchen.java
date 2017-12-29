@@ -1,5 +1,10 @@
 package haushaltsbuch.logic;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.Vector;
+
 import haushaltsbuch.bean.Buchung;
 import haushaltsbuch.bean.Konto;
 import haushaltsbuch.bean.Kontostand;
@@ -16,16 +21,12 @@ import haushaltsbuch.dao.VJBuchungDAO;
 import haushaltsbuch.db.DB;
 import haushaltsbuch.util.Tools;
 
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Vector;
-
 public class LogicBuchen {
 
 	private static LogicBuchen logic;
 
-	private LogicBuchen() {}
+	private LogicBuchen() {
+	}
 
 	public static LogicBuchen instance() {
 		if (logic == null) {
@@ -110,7 +111,7 @@ public class LogicBuchen {
 		SaveBuchung sb = new SaveBuchung();
 		if (check(b)) {
 			try {
-				sb = monthYearEndDecider(b, sb);
+				monthYearEndExecutor(b, sb);
 				BuchungDAO.instance().saveOrUpdate(b);
 				saveKoart(b);
 				saveKontovon(b);
@@ -152,33 +153,22 @@ public class LogicBuchen {
 		}
 	}
 
-	private Boolean check(Buchung b) throws RuntimeException {
-		b.setEindat(new Date());
+	private Boolean check(Buchung b) {
+		b.setEindat(LocalDate.now());
 		if (b.getBuchdat() == null) {
 			throw new RuntimeException("Das Datum darf nicht leer sein!");
 		} else {
-			GregorianCalendar bookDate = new GregorianCalendar();
-			bookDate.setTime(b.getBuchdat());
+			LocalDate bookDate = b.getBuchdat();
+			LocalDate bookMonth = Tools.getLastMonth();
+			LocalDate currentDate = LocalDate.now();
 
-			GregorianCalendar bookMonth = new GregorianCalendar();
-			bookMonth.setTime(Tools.getLastMonth());
-
-			GregorianCalendar currentDate = new GregorianCalendar();
-			currentDate.setTime(new Date());
-			currentDate.add(GregorianCalendar.DAY_OF_MONTH, 1);
-			currentDate.set(GregorianCalendar.HOUR_OF_DAY, 0);
-			currentDate.set(GregorianCalendar.MINUTE, 0);
-			currentDate.set(GregorianCalendar.SECOND, 0);
-			currentDate.set(GregorianCalendar.MILLISECOND, 0);
-
-			if (bookDate.get(GregorianCalendar.YEAR) < bookMonth.get(GregorianCalendar.YEAR)) {
+			if (bookDate.getYear() < bookMonth.getYear()) {
 				throw new RuntimeException("Das Buchdatum liegt zu weit in der Vergangenheit!");
 			}
-			if ((bookDate.get(GregorianCalendar.MONTH) < bookMonth.get(GregorianCalendar.MONTH))
-					&& bookDate.get(GregorianCalendar.YEAR) <= bookMonth.get(GregorianCalendar.YEAR)) {
+			if ((bookDate.getMonthValue() < bookMonth.getMonthValue()) && bookDate.getYear() <= bookMonth.getYear()) {
 				throw new RuntimeException("Das Buchdatum liegt zu weit in der Vergangenheit!");
 			}
-			if (bookDate.after(currentDate)) {
+			if (bookDate.isAfter(currentDate)) {
 				throw new RuntimeException("Das Buchdatum liegt in der Zukunft!");
 			}
 		}
@@ -190,13 +180,13 @@ public class LogicBuchen {
 		} else if (b.getBuchbetr().compareTo(new BigDecimal(0)) <= 0) {
 			throw new RuntimeException("Der Betrag muss größer als 0 sein!");
 		}
-		if (b.getKoart() == null && b.getKontovon() == null
-				&& b.getKontonach() == null) {
+		if (b.getKoart() == null && b.getKontovon() == null && b.getKontonach() == null) {
 			throw new RuntimeException("Kostenart, Konto von und Konto nach sind leer!");
 		} else if (b.getKoart() != null) {
 			if (b.getKoart().getKoartgrp().getKoartgrpkat().equals("E")) {
 				if (b.getKontovon() != null && b.getKontonach() == null) {
-					throw new RuntimeException("Bei dieser Kostenart muss Konto von leer sein und Konto nach ausgewählt sein!");
+					throw new RuntimeException(
+							"Bei dieser Kostenart muss Konto von leer sein und Konto nach ausgewählt sein!");
 				} else if (b.getKontovon() != null && b.getKontonach() != null) {
 					throw new RuntimeException("Bei dieser Kostenart muss Konto von leer sein!");
 				} else if (b.getKontovon() == null && b.getKontonach() == null) {
@@ -212,7 +202,8 @@ public class LogicBuchen {
 				} else if (b.getKontovon() == null && b.getKontonach() == null) {
 					throw new RuntimeException("Bei dieser Kostenart muss Konto von ausgewählt sein!");
 				} else if (b.getKontovon() == null && b.getKontonach() != null) {
-					throw new RuntimeException("Bei dieser Kostenart muss Konto von ausgewählt sein und Konto nach leer sein!");
+					throw new RuntimeException(
+							"Bei dieser Kostenart muss Konto von ausgewählt sein und Konto nach leer sein!");
 				}
 			}
 		} else if (b.getKoart() == null) {
@@ -230,40 +221,27 @@ public class LogicBuchen {
 		return false;
 	}
 
-	private SaveBuchung monthYearEndDecider(Buchung b, SaveBuchung sb)
-			throws RuntimeException {
-		GregorianCalendar bookDate = new GregorianCalendar();
-		bookDate.setTime(b.getBuchdat());
-
-		GregorianCalendar bookMonth = new GregorianCalendar();
-		bookMonth.setTime(Tools.getLastDate());
-
-		return monthYearEnd(bookDate, bookMonth, sb);
+	private void monthYearEndExecutor(Buchung b, SaveBuchung sb) throws RuntimeException {
+		monthYearEnd(b.getBuchdat(), Tools.getLastDate(), sb);
 	}
 
-	private SaveBuchung monthYearEnd(GregorianCalendar future,
-			GregorianCalendar current, SaveBuchung sb) throws RuntimeException {
-		future.set(GregorianCalendar.DAY_OF_MONTH, 1);
-		current.set(GregorianCalendar.DAY_OF_MONTH, 1);
-		if (future.get(GregorianCalendar.YEAR) > current.get(GregorianCalendar.YEAR)) {
-			sb = monthEnd(current, sb);
-			if (current.get(GregorianCalendar.MONTH) == GregorianCalendar.DECEMBER) {
-				sb = yearEnd(current, sb);
+	private void monthYearEnd(LocalDate future, LocalDate current, SaveBuchung sb) {
+		future = future.withDayOfMonth(1);
+		current = current.withDayOfMonth(1);
+		if (future.getYear() > current.getYear()) {
+			monthEnd(current, sb);
+			if (Month.DECEMBER.equals(current.getMonth())) {
+				yearEnd(current, sb);
 			}
-			current.set(GregorianCalendar.MONTH, current.get(GregorianCalendar.MONTH) + 1);
-			monthYearEnd(future, current, sb);
+			monthYearEnd(future, current.plusMonths(1), sb);
 		}
-		if ((future.get(GregorianCalendar.MONTH) > current .get(GregorianCalendar.MONTH))
-				&& future.get(GregorianCalendar.YEAR) == current.get(GregorianCalendar.YEAR)) {
-			sb = monthEnd(current, sb);
-			current.set(GregorianCalendar.MONTH, current.get(GregorianCalendar.MONTH) + 1);
-			monthYearEnd(future, current, sb);
+		if (future.getMonthValue() > current.getMonthValue() && future.getYear() == current.getYear()) {
+			monthEnd(current, sb);
+			monthYearEnd(future, current.plusMonths(1), sb);
 		}
-		return sb;
 	}
 
-	private SaveBuchung yearEnd(GregorianCalendar gc, SaveBuchung sb)
-			throws RuntimeException {
+	private void yearEnd(LocalDate date, SaveBuchung sb) throws RuntimeException {
 		try {
 			for (Buchung b : BuchungDAO.instance().getAll()) {
 				b.setBuchung(null);
@@ -274,15 +252,13 @@ public class LogicBuchen {
 				k.setJreinsaldo(k.getSaldo());
 				KontoDAO.instance().saveOrUpdate(k);
 			}
-			sb.addYearEnd(gc.getTime());
-			return sb;
+			sb.addYearEnd(date);
 		} catch (RuntimeException re) {
 			throw new RuntimeException("Jahresabschluss fehlgeschlagen!");
 		}
 	}
 
-	private SaveBuchung monthEnd(GregorianCalendar gc, SaveBuchung sb)
-			throws RuntimeException {
+	private void monthEnd(LocalDate date, SaveBuchung sb) {
 		try {
 			// tkostenartsaldo befüllen, nur falls buchung im monat vorhanden
 			// sind und dann über alle kostenarten
@@ -292,11 +268,11 @@ public class LogicBuchen {
 					Kostenartsaldo ks = new Kostenartsaldo();
 					ks.setKoart(k);
 					ks.setKoartjrsaldo(getJrSaldo(k));
-					ks.setKoartjrsaldovj(getJrSaldovj(k, gc));
+					ks.setKoartjrsaldovj(getJrSaldovj(k, date));
 					ks.setKoartmonsaldo(k.getKoartsaldo());
-					ks.setKoartsalddat(gc.getTime());
+					ks.setKoartsalddat(date);
 					KostenartsaldoDAO.instance().saveOrUpdate(ks);
-					
+
 					k.setKoartsaldo(new BigDecimal(0));
 					KostenartDAO.instance().saveOrUpdate(k);
 				}
@@ -305,18 +281,14 @@ public class LogicBuchen {
 			for (Konto k : KontoDAO.instance().getAll()) {
 				Kontostand ks = new Kontostand();
 				ks.setKonto(k);
-				ks.setKtostdat(gc.getTime());
+				ks.setKtostdat(date);
 				ks.setKtostsaldo(k.getSaldo());
 				KontostandDAO.instance().saveOrUpdate(ks);
 
-				GregorianCalendar buchdatGC = new GregorianCalendar();
-				buchdatGC.setTime(gc.getTime());
-				buchdatGC.set(GregorianCalendar.MONTH, buchdatGC.get(GregorianCalendar.MONTH) + 1);
-				k.setBuchdat(buchdatGC.getTime());
+				k.setBuchdat(date.plusMonths(1));
 				KontoDAO.instance().saveOrUpdate(k);
 			}
-			sb.addMonthEnd(gc.getTime());
-			return sb;
+			sb.addMonthEnd(date);
 		} catch (RuntimeException re) {
 			throw new RuntimeException("Monatsabschluss fehlgeschlagen!");
 		}
@@ -367,24 +339,20 @@ public class LogicBuchen {
 	private BigDecimal getJrSaldo(Kostenart koart) {
 		BigDecimal jrSaldo = BigDecimal.ZERO;
 		for (Buchung b : BuchungDAO.instance().getAll()) {
-			if (b.getKoart() != null) {
-				if (b.getKoart().equals(koart)) {
-					jrSaldo = jrSaldo.add(b.getBuchbetr());
-				}
+			if (b.getKoart() != null && b.getKoart().equals(koart)) {
+				jrSaldo = jrSaldo.add(b.getBuchbetr());
 			}
 		}
 		return jrSaldo;
 	}
 
-	private BigDecimal getJrSaldovj(Kostenart koart, GregorianCalendar gc) {
-		BigDecimal jrSaldovj = new BigDecimal(0);
-		GregorianCalendar ksGC = new GregorianCalendar();
-		ksGC.setTime(gc.getTime());
-		ksGC.set(GregorianCalendar.YEAR, ksGC.get(GregorianCalendar.YEAR) - 1);
-		Kostenartsaldo ks = KostenartsaldoDAO.instance().find(koart, ksGC);
-		if (ks.getKoartjrsaldo() != null)
-			jrSaldovj = ks.getKoartjrsaldo();
-		return jrSaldovj;
+	private BigDecimal getJrSaldovj(Kostenart koart, LocalDate date) {
+		Kostenartsaldo ks = KostenartsaldoDAO.instance().find(koart, date.minusYears(1));
+		if (ks.getKoartjrsaldo() != null) {
+			return ks.getKoartjrsaldo();
+		} else {
+			return BigDecimal.ZERO;
+		}
 	}
 
 }

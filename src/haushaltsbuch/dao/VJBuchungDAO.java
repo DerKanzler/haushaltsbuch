@@ -1,72 +1,71 @@
 package haushaltsbuch.dao;
 
-import haushaltsbuch.bean.Buchung;
-import haushaltsbuch.db.VJBuchungDB;
-
 import java.util.HashMap;
 import java.util.Vector;
 
+import haushaltsbuch.bean.Buchung;
+import haushaltsbuch.db.VJBuchungDB;
+
 public class VJBuchungDAO {
-	
+
 	private VJBuchungDB db = new VJBuchungDB();
-	private static VJBuchungDAO logic;
-	private Vector<Buchung> buchungsVector;
-	private HashMap<Integer, Buchung> buchungsMap;
-	
-	private VJBuchungDAO() {}
-	
-	public static VJBuchungDAO instance() {
-		if (logic == null) {
-			logic = new VJBuchungDAO();
-		}
-		return logic;
+	private static VJBuchungDAO instance;
+	private Vector<Buchung> buchungList;
+	private HashMap<Integer, Buchung> buchungMap;
+
+	private VJBuchungDAO() {
+		// nothing to do
 	}
-	
+
+	public static VJBuchungDAO instance() {
+		if (instance == null) {
+			instance = new VJBuchungDAO();
+		}
+		return instance;
+	}
+
 	public Buchung getBuchung(Integer i) {
 		return getMap().get(i);
 	}
-	
+
 	public Vector<Buchung> getAll() {
 		try {
-			if (buchungsVector == null) {
-				buchungsVector = db.getAll();
-			}			
-			return buchungsVector;
-		}
-		catch (Exception e) {
+			if (buchungList == null) {
+				buchungList = db.getAll();
+			}
+			return buchungList;
+		} catch (Exception e) {
 			return new Vector<Buchung>();
 		}
 	}
-	
+
 	public HashMap<Integer, Buchung> getMap() {
-		if (buchungsMap == null) {
-			buchungsMap = new HashMap<Integer, Buchung>();
-			for (Buchung b: getAll()) {
-				buchungsMap.put(b.getBuchung(), b);
+		if (buchungMap == null) {
+			buchungMap = new HashMap<Integer, Buchung>();
+			for (Buchung b : getAll()) {
+				buchungMap.put(b.getBuchung(), b);
 			}
-		}			
-		return buchungsMap;
+		}
+		return buchungMap;
 	}
-	
+
 	public Boolean saveOrUpdate(Buchung b) {
 		try {
 			if (b.getBuchung() == null) {
 				db.save(b);
-				return true;
-			}
-			else {
+				clear();
+			} else {
 				db.update(b);
-				return true;
 			}
-		}
-		catch (Exception e) {
-			return false;
+			return true;
+		} catch (Exception e) {
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
 	public void clear() {
-		buchungsVector = null;
-		buchungsMap = null;
+		buchungList = null;
+		buchungMap = null;
 	}
 
 }

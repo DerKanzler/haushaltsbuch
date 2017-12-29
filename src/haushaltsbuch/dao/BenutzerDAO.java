@@ -8,17 +8,18 @@ import haushaltsbuch.db.BenutzerDB;
 public class BenutzerDAO {
 
 	private BenutzerDB db = new BenutzerDB();
-	private static BenutzerDAO logic;
-	private Vector<Benutzer> benutzerVector;
+	private static BenutzerDAO instance;
+	private Vector<Benutzer> benutzerList;
 
 	private BenutzerDAO() {
+		// nothing to do
 	}
 
 	public static BenutzerDAO instance() {
-		if (logic == null) {
-			logic = new BenutzerDAO();
+		if (instance == null) {
+			instance = new BenutzerDAO();
 		}
-		return logic;
+		return instance;
 	}
 
 	public Benutzer getUser() {
@@ -32,31 +33,31 @@ public class BenutzerDAO {
 
 	public Vector<Benutzer> getAll() {
 		try {
-			if (benutzerVector == null) {
-				benutzerVector = db.getAll();
+			if (benutzerList == null) {
+				benutzerList = db.getAll();
 			}
-			return benutzerVector;
+			return benutzerList;
 		} catch (Exception e) {
 			return new Vector<Benutzer>();
 		}
 	}
 
-	public Boolean saveOrUpdate(Benutzer b) throws RuntimeException {
+	public Boolean saveOrUpdate(Benutzer b) {
 		try {
 			if (b.getBenutzer() == null) {
 				db.save(b);
-				return true;
 			} else {
 				db.update(b);
-				return true;
 			}
+			clear();
+			return true;
 		} catch (Exception e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
 
 	public void clear() {
-		benutzerVector = null;
+		benutzerList = null;
 	}
 
 }

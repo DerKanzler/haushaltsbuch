@@ -1,21 +1,25 @@
 package haushaltsbuch.db;
 
-import haushaltsbuch.bean.Kostenartsaldo;
-import haushaltsbuch.dao.KostenartDAO;
-
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Vector;
 
+import haushaltsbuch.bean.Kostenartsaldo;
+import haushaltsbuch.dao.KostenartDAO;
+import haushaltsbuch.exceptions.ConfigurationException;
+import haushaltsbuch.exceptions.InstallationException;
+
 public class KostenartsaldoDB {
-	
+
 	private final String select = "SELECT \"koartsald#\", \"koartsalddat\", \"koartmonsaldo\", \"koartjrsaldo\", \"koartjrsaldovj\", \"koart#\" FROM \"tkostenartsaldo\" ";
 	private final String order = "ORDER BY \"koartsalddat\" ASC, \"koartsald#\" DESC ";
-	
-	public Vector<Kostenartsaldo> find(Kostenartsaldo ks) throws Exception {
+
+	public Vector<Kostenartsaldo> find(Kostenartsaldo ks)
+			throws SQLException, InstallationException, ConfigurationException {
 		String where = createWhere(ks);
 		PreparedStatement ps = DB.instance().getConnection().prepareStatement(select + where + order);
 		ResultSet rs = prepareStatement(ps, ks).executeQuery();
@@ -26,8 +30,8 @@ public class KostenartsaldoDB {
 		ps.close();
 		return kostenartsaldi;
 	}
-	
-	public Vector<Kostenartsaldo> getAll() throws Exception {		
+
+	public Vector<Kostenartsaldo> getAll() throws Exception {
 		PreparedStatement ps = DB.instance().getConnection().prepareStatement(select + order);
 		ResultSet rs = ps.executeQuery();
 		Vector<Kostenartsaldo> kontostaende = new Vector<Kostenartsaldo>();
@@ -42,28 +46,29 @@ public class KostenartsaldoDB {
 		String insert = "INSERT INTO \"tkostenartsaldo\" (\"koartsalddat\", \"koartmonsaldo\", \"koartjrsaldo\", \"koartjrsaldovj\", \"koart#\") ";
 		String values = "VALUES (?, ?, ?, ?, ?) ";
 
-		PreparedStatement ps = DB.instance().getConnection().prepareStatement(insert + values, Statement.RETURN_GENERATED_KEYS);
-		ps.setDate(1, new Date(kostenartsaldo.getKoartsalddat().getTime()));
+		PreparedStatement ps = DB.instance().getConnection().prepareStatement(insert + values,
+				Statement.RETURN_GENERATED_KEYS);
+		ps.setDate(1, Date.valueOf(kostenartsaldo.getKoartsalddat()));
 		ps.setObject(2, kostenartsaldo.getKoartmonsaldo(), Types.DECIMAL);
 		ps.setObject(3, kostenartsaldo.getKoartjrsaldo(), Types.DECIMAL);
 		ps.setObject(4, kostenartsaldo.getKoartjrsaldovj(), Types.DECIMAL);
 		ps.setInt(5, kostenartsaldo.getKoart().getKoart());
 		ps.execute();
-		
+
 		ResultSet rs = ps.getGeneratedKeys();
 		while (rs.next()) {
 			kostenartsaldo.setKoartsald(rs.getInt(1));
 		}
 		ps.close();
 	}
-	
+
 	public void update(Kostenartsaldo kostenartsaldo) throws Exception {
 		String update = "UPDATE \"tkostenartsaldo\" ";
 		String set = "SET \"koartsalddat\" = ?, \"koartmonsaldo\" = ?, \"koartjrsaldo\" = ?, \"koartjrsaldovj\" = ? ";
-		String where= "WHERE \"koartsald#\" = ? ";
+		String where = "WHERE \"koartsald#\" = ? ";
 
 		PreparedStatement ps = DB.instance().getConnection().prepareStatement(update + set + where);
-		ps.setDate(1, new Date(kostenartsaldo.getKoartsalddat().getTime()));
+		ps.setDate(1, Date.valueOf(kostenartsaldo.getKoartsalddat()));
 		ps.setObject(2, kostenartsaldo.getKoartmonsaldo(), Types.DECIMAL);
 		ps.setObject(3, kostenartsaldo.getKoartjrsaldo(), Types.DECIMAL);
 		ps.setObject(4, kostenartsaldo.getKoartjrsaldovj(), Types.DECIMAL);
@@ -71,11 +76,11 @@ public class KostenartsaldoDB {
 		ps.executeUpdate();
 		ps.close();
 	}
-	
-	private Kostenartsaldo resultSetToKostenartsaldo(ResultSet rs) throws Exception {
+
+	private Kostenartsaldo resultSetToKostenartsaldo(ResultSet rs) throws SQLException {
 		Kostenartsaldo kostenartsaldo = new Kostenartsaldo();
 		kostenartsaldo.setKoartsald(rs.getInt("koartsald#"));
-		kostenartsaldo.setKoartsalddat(rs.getDate("koartsalddat"));
+		kostenartsaldo.setKoartsalddat(rs.getDate("koartsalddat").toLocalDate());
 		kostenartsaldo.setKoartmonsaldo(rs.getBigDecimal("koartmonsaldo"));
 		kostenartsaldo.setKoartjrsaldo(rs.getBigDecimal("koartjrsaldo"));
 		kostenartsaldo.setKoartjrsaldovj(rs.getBigDecimal("koartjrsaldovj"));
@@ -88,53 +93,53 @@ public class KostenartsaldoDB {
 		Integer count = 0;
 		if (ks.getKoart() != null) {
 			if (count > 0) {
-				where.append("AND ");	
+				where.append("AND ");
 			}
 			where.append("\"koart#\" LIKE ? ");
 			count++;
 		}
 		if (ks.getKoartjrsaldo() != null) {
 			if (count > 0) {
-				where.append("AND ");	
+				where.append("AND ");
 			}
 			where.append("\"koartjrsaldo\" = ? ");
 			count++;
 		}
 		if (ks.getKoartjrsaldovj() != null) {
 			if (count > 0) {
-				where.append("AND ");	
+				where.append("AND ");
 			}
 			where.append("\"koartjrsaldovj\" = ? ");
 			count++;
 		}
 		if (ks.getKoartmonsaldo() != null) {
 			if (count > 0) {
-				where.append("AND ");	
+				where.append("AND ");
 			}
 			where.append("\"koartmonsaldo\" = ? ");
 			count++;
 		}
 		if (ks.getKoartsalddat() != null) {
 			if (count > 0) {
-				where.append("AND ");	
+				where.append("AND ");
 			}
 			where.append("\"koartsalddat\" = ? ");
 			count++;
 		}
 		if (ks.getKoartsald() != null) {
 			if (count > 0) {
-				where.append("AND ");	
+				where.append("AND ");
 			}
 			where.append("\"koartsald#\" = ? ");
 			count++;
 		}
 		if (count > 0) {
 			return where.toString();
-		}
-		else return new String();
+		} else
+			return new String();
 	}
-	
-	private PreparedStatement prepareStatement(PreparedStatement ps, Kostenartsaldo ks) throws Exception {
+
+	private PreparedStatement prepareStatement(PreparedStatement ps, Kostenartsaldo ks) throws SQLException {
 		Integer count = 1;
 		if (ks.getKoart() != null) {
 			ps.setInt(count, ks.getKoart().getKoart());
@@ -153,7 +158,7 @@ public class KostenartsaldoDB {
 			count++;
 		}
 		if (ks.getKoartsalddat() != null) {
-			ps.setDate(count, new Date(ks.getKoartsalddat().getTime()));
+			ps.setDate(count, Date.valueOf(ks.getKoartsalddat()));
 			count++;
 		}
 		if (ks.getKoartsald() != null) {
@@ -162,5 +167,5 @@ public class KostenartsaldoDB {
 		}
 		return ps;
 	}
-	
+
 }
