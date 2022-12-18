@@ -172,7 +172,7 @@ public class UIHaushaltsbuch {
 		applicationMenuItem.setMenu(applicationMenu);
 
 		aboutItem = new MenuItem(applicationMenu, SWT.PUSH);
-		aboutItem.setText(res.getString("About") + res.getString("Application"));
+		aboutItem.setText(res.getString("About"));
 		aboutItem.addListener(SWT.Selection, new Listener() {
 
 			public void handleEvent(Event e) {
