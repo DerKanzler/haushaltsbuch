@@ -9,7 +9,7 @@ public class LogicKoartAdmin {
 
     private static LogicKoartAdmin logic;
 
-    private LogicKoartAdmin() {};
+    private LogicKoartAdmin() {}
 
     public static LogicKoartAdmin instance() {
         if (logic == null) {
@@ -19,8 +19,7 @@ public class LogicKoartAdmin {
     }
 
     public Vector<Kostenart> getAll() {
-        Vector<Kostenart> kostenarten = KostenartDAO.instance().getAll();
-        return kostenarten;
+        return KostenartDAO.instance().getAll();
     }
 
 }

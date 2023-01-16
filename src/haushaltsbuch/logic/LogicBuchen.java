@@ -40,23 +40,22 @@ public class LogicBuchen {
             sb.setFromDate(Tools.getLastMonth());
             return BuchungDAO.instance().search(sb);
         } catch (Exception e) {
-            return new Vector<Buchung>();
+            return new Vector<>();
         }
     }
 
     public Vector<Konto> getKontenList() {
-        Vector<Konto> konten = KontoDAO.instance().getAllValid();
-        return konten;
+        return KontoDAO.instance().getAllValid();
     }
 
     public Vector<Kostenart> getKoartList() {
-        Vector<Kostenart> kostenarten = KostenartDAO.instance().getAll();
-        return kostenarten;
+        return KostenartDAO.instance().getAll();
     }
 
     public BigDecimal getDisposableSum() {
-        BigDecimal sum = new BigDecimal(0);
-        for (Konto k : KontoDAO.instance().getAll()) {
+        BigDecimal sum = BigDecimal.ZERO;
+        Vector<Konto> konten = KontoDAO.instance().getAll();
+        for (Konto k : konten) {
             if (k.isValid() && k.isDisposable()) {
                 sum = sum.add(k.getSaldo());
             }
@@ -65,8 +64,9 @@ public class LogicBuchen {
     }
 
     public BigDecimal getOffLimitSum() {
-        BigDecimal sum = new BigDecimal(0);
-        for (Konto k : KontoDAO.instance().getAll()) {
+        BigDecimal sum = BigDecimal.ZERO;
+        Vector<Konto> konten = KontoDAO.instance().getAll();
+        for (Konto k : konten) {
             if (k.isValid() && !k.isDisposable()) {
                 sum = sum.add(k.getSaldo());
             }
@@ -79,10 +79,11 @@ public class LogicBuchen {
     }
 
     public BigDecimal getTotalRevenues() {
-        BigDecimal totalRevenues = new BigDecimal(0.00);
-        for (Buchung b : getMonthBookings()) {
+        BigDecimal totalRevenues = BigDecimal.ZERO;
+        Vector<Buchung> monthBookings = getMonthBookings();
+        for (Buchung b : monthBookings) {
             if (b.getKoart() != null) {
-                if (b.getKoart().getKoartgrp().getKoartgrpkat().equals("E")) {
+                if ("E".equals(b.getKoart().getKoartgrp().getKoartgrpkat())) {
                     totalRevenues = totalRevenues.add(b.getBuchbetr());
                 }
             }
@@ -91,10 +92,11 @@ public class LogicBuchen {
     }
 
     public BigDecimal getTotalExpenses() {
-        BigDecimal totalExpenses = new BigDecimal(0.00);
-        for (Buchung b : getMonthBookings()) {
+        BigDecimal totalExpenses = BigDecimal.ZERO;
+        Vector<Buchung> monthBookings = getMonthBookings();
+        for (Buchung b : monthBookings) {
             if (b.getKoart() != null) {
-                if (b.getKoart().getKoartgrp().getKoartgrpkat().equals("A")) {
+                if ("A".equals(b.getKoart().getKoartgrp().getKoartgrpkat())) {
                     totalExpenses = totalExpenses.add(b.getBuchbetr());
                 }
             }
@@ -182,7 +184,7 @@ public class LogicBuchen {
         if (b.getKoart() == null && b.getKontovon() == null && b.getKontonach() == null) {
             throw new RuntimeException("Kostenart, Konto von und Konto nach sind leer!");
         } else if (b.getKoart() != null) {
-            if (b.getKoart().getKoartgrp().getKoartgrpkat().equals("E")) {
+            if ("E".equals(b.getKoart().getKoartgrp().getKoartgrpkat())) {
                 if (b.getKontovon() != null && b.getKontonach() == null) {
                     throw new RuntimeException(
                             "Bei dieser Kostenart muss Konto von leer sein und Konto nach ausgewählt sein!");
@@ -193,7 +195,7 @@ public class LogicBuchen {
                 } else if (b.getKontovon() == null && b.getKontonach() != null) {
                     return true;
                 }
-            } else if (b.getKoart().getKoartgrp().getKoartgrpkat().equals("A")) {
+            } else if ("A".equals(b.getKoart().getKoartgrp().getKoartgrpkat())) {
                 if (b.getKontovon() != null && b.getKontonach() == null) {
                     return true;
                 } else if (b.getKontovon() != null && b.getKontonach() != null) {
@@ -211,8 +213,9 @@ public class LogicBuchen {
             } else if (b.getKontovon() != null && b.getKontonach() != null) {
                 if (b.getKontovon().equals(b.getKontonach())) {
                     throw new RuntimeException("Konto von und Konto nach dürfen nicht gleich sein!");
-                } else
+                } else {
                     return true;
+                }
             } else if (b.getKontovon() == null && b.getKontonach() != null) {
                 throw new RuntimeException("Bei leerer Kostenart müssen Konto von und Konto nach ausgewählt sein!");
             }
@@ -242,12 +245,14 @@ public class LogicBuchen {
 
     private void yearEnd(LocalDate date, SaveBuchung sb) throws RuntimeException {
         try {
-            for (Buchung b : BuchungDAO.instance().getAll()) {
+            Vector<Buchung> buchungen = BuchungDAO.instance().getAll();
+            for (Buchung b : buchungen) {
                 b.setBuchung(null);
                 VJBuchungDAO.instance().saveOrUpdate(b);
             }
             BuchungDAO.instance().deleteAll();
-            for (Konto k : KontoDAO.instance().getAll()) {
+            Vector<Konto> konten = KontoDAO.instance().getAll();
+            for (Konto k : konten) {
                 k.setJreinsaldo(k.getSaldo());
                 KontoDAO.instance().saveOrUpdate(k);
             }
@@ -263,7 +268,8 @@ public class LogicBuchen {
             // sind und dann über alle kostenarten
             if (getMonthBookings().size() > 0) {
                 // Kostenartsaldo wird in tkostenart auf 0 gesetzt
-                for (Kostenart k : KostenartDAO.instance().getAll()) {
+                Vector<Kostenart> kostenarten = KostenartDAO.instance().getAll();
+                for (Kostenart k : kostenarten) {
                     Kostenartsaldo ks = new Kostenartsaldo();
                     ks.setKoart(k);
                     ks.setKoartjrsaldo(getJrSaldo(k));
@@ -272,12 +278,13 @@ public class LogicBuchen {
                     ks.setKoartsalddat(date);
                     KostenartsaldoDAO.instance().saveOrUpdate(ks);
 
-                    k.setKoartsaldo(new BigDecimal(0));
+                    k.setKoartsaldo(BigDecimal.ZERO);
                     KostenartDAO.instance().saveOrUpdate(k);
                 }
             }
             // tkontostand befüllen & tkonto: buchdat aktualisiern
-            for (Konto k : KontoDAO.instance().getAll()) {
+            Vector<Konto> konten = KontoDAO.instance().getAll();
+            for (Konto k : konten) {
                 Kontostand ks = new Kontostand();
                 ks.setKonto(k);
                 ks.setKtostdat(date);
@@ -337,7 +344,8 @@ public class LogicBuchen {
 
     private BigDecimal getJrSaldo(Kostenart koart) {
         BigDecimal jrSaldo = BigDecimal.ZERO;
-        for (Buchung b : BuchungDAO.instance().getAll()) {
+        Vector<Buchung> buchungen = BuchungDAO.instance().getAll();
+        for (Buchung b : buchungen) {
             if (b.getKoart() != null && b.getKoart().equals(koart)) {
                 jrSaldo = jrSaldo.add(b.getBuchbetr());
             }

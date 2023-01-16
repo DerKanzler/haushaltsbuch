@@ -23,8 +23,7 @@ public class BenutzerDAO {
     }
 
     public Benutzer getUser() {
-        Benutzer b = getBenutzer();
-        return b;
+        return getBenutzer();
     }
 
     public Benutzer getBenutzer() {
@@ -38,7 +37,7 @@ public class BenutzerDAO {
             }
             return benutzerList;
         } catch (Exception e) {
-            return new Vector<Benutzer>();
+            return new Vector<>();
         }
     }
 

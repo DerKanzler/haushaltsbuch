@@ -54,8 +54,9 @@ public class LogicJahrUEKoart {
                     KostenartCollection k = new KostenartCollection(year, ks.getKoart());
                     k.addKostenartsaldo(ks);
                     kostenarten.put(ks.getKoart(), k);
-                } else
+                } else {
                     kostenarten.get(ks.getKoart()).addKostenartsaldo(ks);
+                }
             }
         }
         Iterator<Map.Entry<Kostenart, KostenartCollection>> i = kostenarten.entrySet().iterator();
@@ -126,9 +127,11 @@ public class LogicJahrUEKoart {
     public BigDecimal getIncCurrent() {
         if (incCurrent == null) {
             incCurrent = BigDecimal.ZERO;
-            for (Kostenart k : KostenartDAO.instance().getAll()) {
-                if (k.getKoartgrp().getKoartgrpkat().equals(Kostenartgruppe.KAT_INCOME))
+            Vector<Kostenart> kostenarten = KostenartDAO.instance().getAll();
+            for (Kostenart k : kostenarten) {
+                if (k.getKoartgrp().getKoartgrpkat().equals(Kostenartgruppe.KAT_INCOME)) {
                     incCurrent = incCurrent.add(k.getKoartsaldo());
+                }
             }
         }
         return incCurrent;
@@ -137,9 +140,11 @@ public class LogicJahrUEKoart {
     public BigDecimal getExpCurrent() {
         if (expCurrent == null) {
             expCurrent = BigDecimal.ZERO;
-            for (Kostenart k : KostenartDAO.instance().getAll()) {
-                if (k.getKoartgrp().getKoartgrpkat().equals(Kostenartgruppe.KAT_EXPENSES))
+            Vector<Kostenart> kostenarten = KostenartDAO.instance().getAll();
+            for (Kostenart k : kostenarten) {
+                if (k.getKoartgrp().getKoartgrpkat().equals(Kostenartgruppe.KAT_EXPENSES)) {
                     expCurrent = expCurrent.add(k.getKoartsaldo());
+                }
             }
         }
         return expCurrent;
@@ -148,10 +153,12 @@ public class LogicJahrUEKoart {
     public BigDecimal getExpHHCurrent() {
         if (expHHCurrent == null) {
             expHHCurrent = BigDecimal.ZERO;
-            for (Kostenart k : KostenartDAO.instance().getAll()) {
+            Vector<Kostenart> kostenarten = KostenartDAO.instance().getAll();
+            for (Kostenart k : kostenarten) {
                 if (k.getKoartgrp().getKoartgrpkat().equals(Kostenartgruppe.KAT_EXPENSES)
-                        && !k.getKoartgrp().getKoartgrpart().equals(Kostenartgruppe.ART_HH))
+                        && !k.getKoartgrp().getKoartgrpart().equals(Kostenartgruppe.ART_HH)) {
                     expHHCurrent = expHHCurrent.add(k.getKoartsaldo());
+                }
             }
         }
         return expHHCurrent;
@@ -165,71 +172,83 @@ public class LogicJahrUEKoart {
         if (year.equals(Tools.getLastDate().getYear())) {
             return getIncCurYear().divide(BigDecimal.valueOf(Tools.getLastDate().getMonthValue()), 13,
                     BigDecimal.ROUND_HALF_UP);
-        } else
+        } else {
             return getIncCurYear().divide(new BigDecimal(12), 13, BigDecimal.ROUND_HALF_UP);
+        }
     }
 
     public BigDecimal getExpAvg() {
         if (year.equals(Tools.getLastDate().getYear())) {
             return getExpCurYear().divide(BigDecimal.valueOf(Tools.getLastDate().getMonthValue()), 13,
                     BigDecimal.ROUND_HALF_UP);
-        } else
+        } else {
             return getExpCurYear().divide(new BigDecimal(12), 13, BigDecimal.ROUND_HALF_UP);
+        }
     }
 
     public BigDecimal getExpHHAvg() {
         if (year.equals(Tools.getLastDate().getYear())) {
             return getExpHHCurYear().divide(BigDecimal.valueOf(Tools.getLastDate().getMonthValue()), 13,
                     BigDecimal.ROUND_HALF_UP);
-        } else
+        } else {
             return getExpHHCurYear().divide(new BigDecimal(12), 13, BigDecimal.ROUND_HALF_UP);
+        }
     }
 
     public BigDecimal getSavAvg() {
         if (year.equals(Tools.getLastDate().getYear())) {
             return getSavCurYear().divide(BigDecimal.valueOf(Tools.getLastDate().getMonthValue()), 13,
                     BigDecimal.ROUND_HALF_UP);
-        } else
+        } else {
             return getSavCurYear().divide(new BigDecimal(12), 13, BigDecimal.ROUND_HALF_UP);
+        }
     }
 
     public BigDecimal getIncPerc() throws MathException {
-        if (getIncPrevYear().compareTo(BigDecimal.ZERO) == 0)
+        if (getIncPrevYear().compareTo(BigDecimal.ZERO) == 0) {
             throw new MathException();
+        }
         BigDecimal percentage = getIncDiff().divide(getIncPrevYear(), 13, BigDecimal.ROUND_HALF_UP)
                 .multiply(new BigDecimal(100));
-        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getIncDiff().compareTo(BigDecimal.ZERO) >= 0)
+        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getIncDiff().compareTo(BigDecimal.ZERO) >= 0) {
             percentage = percentage.multiply(new BigDecimal(-1));
+        }
         return percentage;
     }
 
     public BigDecimal getExpPerc() throws MathException {
-        if (getExpPrevYear().compareTo(BigDecimal.ZERO) == 0)
+        if (getExpPrevYear().compareTo(BigDecimal.ZERO) == 0) {
             throw new MathException();
+        }
         BigDecimal percentage = getExpDiff().divide(getExpPrevYear(), 13, BigDecimal.ROUND_HALF_UP)
                 .multiply(new BigDecimal(100));
-        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getExpDiff().compareTo(BigDecimal.ZERO) >= 0)
+        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getExpDiff().compareTo(BigDecimal.ZERO) >= 0) {
             percentage = percentage.multiply(new BigDecimal(-1));
+        }
         return percentage;
     }
 
     public BigDecimal getExpHHPerc() throws MathException {
-        if (getExpHHPrevYear().compareTo(BigDecimal.ZERO) == 0)
+        if (getExpHHPrevYear().compareTo(BigDecimal.ZERO) == 0) {
             throw new MathException();
+        }
         BigDecimal percentage = getExpHHDiff().divide(getExpHHPrevYear(), 13, BigDecimal.ROUND_HALF_UP)
                 .multiply(new BigDecimal(100));
-        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getExpHHDiff().compareTo(BigDecimal.ZERO) >= 0)
+        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getExpHHDiff().compareTo(BigDecimal.ZERO) >= 0) {
             percentage = percentage.multiply(new BigDecimal(-1));
+        }
         return percentage;
     }
 
     public BigDecimal getSavPerc() throws MathException {
-        if (getSavPrevYear().compareTo(BigDecimal.ZERO) == 0)
+        if (getSavPrevYear().compareTo(BigDecimal.ZERO) == 0) {
             throw new MathException();
+        }
         BigDecimal percentage = getSavDiff().divide(getSavPrevYear(), 13, BigDecimal.ROUND_HALF_UP)
                 .multiply(new BigDecimal(100));
-        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getSavDiff().compareTo(BigDecimal.ZERO) >= 0)
+        if (percentage.compareTo(BigDecimal.ZERO) < 0 && getSavDiff().compareTo(BigDecimal.ZERO) >= 0) {
             percentage = percentage.multiply(new BigDecimal(-1));
+        }
         return percentage;
     }
 

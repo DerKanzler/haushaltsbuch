@@ -35,14 +35,15 @@ public class KostenartgruppeDAO {
             }
             return koartgruppeList;
         } catch (Exception e) {
-            return new Vector<Kostenartgruppe>();
+            return new Vector<>();
         }
     }
 
     public HashMap<Integer, Kostenartgruppe> getMap() {
         if (koartgruppeMap == null) {
-            koartgruppeMap = new HashMap<Integer, Kostenartgruppe>();
-            for (Kostenartgruppe k : getAll()) {
+            koartgruppeMap = new HashMap<>();
+            Vector<Kostenartgruppe> kostenartenGruppen = getAll();
+            for (Kostenartgruppe k : kostenartenGruppen) {
                 koartgruppeMap.put(k.getKoartgrp(), k);
             }
         }

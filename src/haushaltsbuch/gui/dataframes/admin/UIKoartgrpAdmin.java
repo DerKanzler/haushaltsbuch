@@ -20,9 +20,9 @@ import haushaltsbuch.logic.admin.LogicKoartgrpAdmin;
 
 /**
  * This class displays the search screen.
- * 
+ *
  * You can search for bookings with the bookingtext, the amount or other values.
- * 
+ *
  * @author pk
  *
  */
@@ -37,12 +37,12 @@ public class UIKoartgrpAdmin extends UIAbstractAdmin implements SelectionListene
     private Button addButton;
 
     private LogicKoartgrpAdmin logic = LogicKoartgrpAdmin.instance();
-    private Vector<UIKoartgrpComposite> costTypeGroupsComposites = new Vector<UIKoartgrpComposite>();
+    private Vector<UIKoartgrpComposite> costTypeGroupsComposites = new Vector<>();
 
     /**
      * Constructor: Since UIKonto extends Composite the super constructor is called here with the given arguments.
      * Builds the visible user interface. Uses GridLayout with 3 columns.
-     * 
+     *
      * @param Composite
      * @param Integer
      */
@@ -71,6 +71,7 @@ public class UIKoartgrpAdmin extends UIAbstractAdmin implements SelectionListene
         addButton.addSelectionListener(this);
     }
 
+    @Override
     public void lock() {
         for (UIKoartgrpComposite ctgc : costTypeGroupsComposites) {
             ctgc.lock();
@@ -79,23 +80,27 @@ public class UIKoartgrpAdmin extends UIAbstractAdmin implements SelectionListene
         addButton.setEnabled(false);
     }
 
+    @Override
     public void unlock() {
         UIKoartgrpComposite delCTGC = null;
         for (UIKoartgrpComposite ctgc : costTypeGroupsComposites) {
             ctgc.unlock();
             if (ctgc.isUsed()) {
-                if (ctgc.isNew())
+                if (ctgc.isNew()) {
                     delCTGC = ctgc;
-                else
+                } else {
                     ctgc.discard();
+                }
             }
         }
-        if (delCTGC != null)
+        if (delCTGC != null) {
             remove(delCTGC);
+        }
         this.getShell().setModified(false);
         addButton.setEnabled(true);
     }
 
+    @Override
     public void remove(Composite ctgc) {
         costTypeGroupsComposites.remove(ctgc);
         ctgc.dispose();
@@ -103,13 +108,15 @@ public class UIKoartgrpAdmin extends UIAbstractAdmin implements SelectionListene
         sComp.setOrigin(0, 0);
     }
 
+    @Override
     public void resize() {
         sComp.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     }
 
+    @Override
     public void update() {
         content = new Composite(sComp, SWT.NONE);
-        costTypeGroupsComposites = new Vector<UIKoartgrpComposite>();
+        costTypeGroupsComposites = new Vector<>();
 
         buildCostTypesList();
         sComp.setContent(content);
@@ -126,7 +133,8 @@ public class UIKoartgrpAdmin extends UIAbstractAdmin implements SelectionListene
         layout.verticalSpacing = 0;
         content.setLayout(layout);
 
-        for (Kostenartgruppe koartgrp : logic.getAll()) {
+        Vector<Kostenartgruppe> kostenartenGruppen = logic.getAll();
+        for (Kostenartgruppe koartgrp : kostenartenGruppen) {
             UIKoartgrpComposite koartgrpComposite = new UIKoartgrpComposite(content, SWT.NONE);
             koartgrpComposite.buildUI(koartgrp);
             koartgrpComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -137,11 +145,13 @@ public class UIKoartgrpAdmin extends UIAbstractAdmin implements SelectionListene
     /**
      * Does nothing.
      */
+    @Override
     public void widgetDefaultSelected(SelectionEvent se) {}
 
     /**
      * Catches the SelectionEvent when a button is clicked.
      */
+    @Override
     public void widgetSelected(SelectionEvent se) {
         if (se.getSource().equals(addButton)) {
             UIKoartgrpComposite koartgrpComposite = new UIKoartgrpComposite(content, SWT.NONE);

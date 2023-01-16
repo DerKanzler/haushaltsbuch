@@ -35,13 +35,14 @@ public class KontoDAO {
             }
             return kontoList;
         } catch (Exception e) {
-            return new Vector<Konto>();
+            return new Vector<>();
         }
     }
 
     public Vector<Konto> getAllValid() {
-        Vector<Konto> konten = new Vector<Konto>();
-        for (Konto k : getAll()) {
+        Vector<Konto> konten = new Vector<>();
+        Vector<Konto> originalKonten = getAll();
+        for (Konto k : originalKonten) {
             if (k.isValid()) {
                 konten.addElement(k);
             }
@@ -51,8 +52,9 @@ public class KontoDAO {
 
     public HashMap<Integer, Konto> getMap() {
         if (kontoMap == null) {
-            kontoMap = new HashMap<Integer, Konto>();
-            for (Konto k : getAll()) {
+            kontoMap = new HashMap<>();
+            Vector<Konto> originalKonten = getAll();
+            for (Konto k : originalKonten) {
                 kontoMap.put(k.getKonto(), k);
             }
         }

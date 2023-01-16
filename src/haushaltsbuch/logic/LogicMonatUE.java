@@ -23,7 +23,7 @@ import haushaltsbuch.util.Tools;
 
 public class LogicMonatUE {
 
-    private SortedMap<Kostenartgruppe, Vector<Kostenartsaldo>> koart = new TreeMap<Kostenartgruppe, Vector<Kostenartsaldo>>();
+    private SortedMap<Kostenartgruppe, Vector<Kostenartsaldo>> koart = new TreeMap<>();
 
     private BigDecimal disposableSum = BigDecimal.ZERO;
     private BigDecimal offlimitSum = BigDecimal.ZERO;
@@ -32,19 +32,23 @@ public class LogicMonatUE {
 
     public LogicMonatUE(LocalDate date) {
         if (date.equals(Tools.getLastMonth())) {
-            for (Konto k : KontoDAO.instance().getAllValid()) {
+            Vector<Konto> konten = KontoDAO.instance().getAllValid();
+            for (Konto k : konten) {
                 if (k.isDisposable()) {
                     disposableSum = disposableSum.add(k.getSaldo());
-                } else
+                } else {
                     offlimitSum = offlimitSum.add(k.getSaldo());
+                }
             }
             getCosttypeGroups();
         } else {
-            for (Kontostand kost : KontostandDAO.instance().getKontostaende(date)) {
+            Vector<Kontostand> kontostaende = KontostandDAO.instance().getKontostaende(date);
+            for (Kontostand kost : kontostaende) {
                 if (kost.getKonto().isDisposable()) {
                     disposableSum = disposableSum.add(kost.getKtostsaldo());
-                } else
+                } else {
                     offlimitSum = offlimitSum.add(kost.getKtostsaldo());
+                }
             }
             getCosttypeGroups(date);
         }
@@ -55,20 +59,24 @@ public class LogicMonatUE {
     }
 
     public Vector<Kontostand> getAccounts(LocalDate date) {
-        Vector<Kontostand> kost = new Vector<Kontostand>();
+        Vector<Kontostand> kost = new Vector<>();
         if (date.equals(Tools.getLastMonth())) {
-            for (Konto konto : KontoDAO.instance().getAll()) {
+            Vector<Konto> konten = KontoDAO.instance().getAll();
+            for (Konto konto : konten) {
                 Kontostand ks = new Kontostand();
                 ks.setKonto(konto);
                 ks.setKtostdat(konto.getBuchdat());
                 ks.setKtostsaldo(konto.getSaldo());
-                if (displayAccount(date, ks))
+                if (displayAccount(date, ks)) {
                     kost.add(ks);
+                }
             }
         } else {
-            for (Kontostand ks : KontostandDAO.instance().getKontostaende(date)) {
-                if (displayAccount(date, ks))
+            Vector<Kontostand> kontostaende = KontostandDAO.instance().getKontostaende(date);
+            for (Kontostand ks : kontostaende) {
+                if (displayAccount(date, ks)) {
                     kost.add(ks);
+                }
             }
         }
         return kost;
@@ -79,8 +87,9 @@ public class LogicMonatUE {
     }
 
     private SortedMap<Kostenartgruppe, Vector<Kostenartsaldo>> getCosttypeGroups() {
-        Vector<Kostenartsaldo> koartsaldi = new Vector<Kostenartsaldo>();
-        for (Kostenart koart : KostenartDAO.instance().getAll()) {
+        Vector<Kostenartsaldo> koartsaldi = new Vector<>();
+        Vector<Kostenart> kostenarten = KostenartDAO.instance().getAll();
+        for (Kostenart koart : kostenarten) {
             Kostenartsaldo k = new Kostenartsaldo();
             k.setKoart(koart);
             k.setKoartmonsaldo(koart.getKoartsaldo());
@@ -99,14 +108,16 @@ public class LogicMonatUE {
             if (ct.getKoartmonsaldo().compareTo(BigDecimal.ZERO) != 0) {
                 if (ct.getKoart().getKoartgrp().getKoartgrpkat().equals(HB.AUSGABE)) {
                     totalExpenses = totalExpenses.add(ct.getKoartmonsaldo());
-                } else
+                } else {
                     totalRevenues = totalRevenues.add(ct.getKoartmonsaldo());
+                }
                 if (!koart.containsKey(ct.getKoart().getKoartgrp())) {
-                    Vector<Kostenartsaldo> cts = new Vector<Kostenartsaldo>();
+                    Vector<Kostenartsaldo> cts = new Vector<>();
                     cts.add(ct);
                     koart.put(ct.getKoart().getKoartgrp(), cts);
-                } else
+                } else {
                     koart.get(ct.getKoart().getKoartgrp()).add(ct);
+                }
             }
         }
         return koart;

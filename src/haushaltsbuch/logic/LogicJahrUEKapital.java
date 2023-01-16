@@ -49,8 +49,9 @@ public class LogicJahrUEKapital {
                     KontoCollection k = new KontoCollection(year, kst.getKonto());
                     k.addKontostand(kst);
                     konten.put(kst.getKonto(), k);
-                } else
+                } else {
                     konten.get(kst.getKonto()).addKontostand(kst);
+                }
             }
         }
 
@@ -66,8 +67,9 @@ public class LogicJahrUEKapital {
                     lockBeginn = lockBeginn.add(e.getValue().getYearIn());
                     lockEnd = lockEnd.add(e.getValue().getYearOut());
                 }
-            } else
+            } else {
                 i.remove();
+            }
         }
     }
 
@@ -112,30 +114,35 @@ public class LogicJahrUEKapital {
     public BigDecimal getDispDiff() {
         if (year.equals(Tools.getLastDate().getYear())) {
             return getDispCurrent().subtract(getDispBeginn());
-        } else
+        } else {
             return getDispEnd().subtract(getDispBeginn());
+        }
     }
 
     public BigDecimal getLockDiff() {
         if (year.equals(Tools.getLastDate().getYear())) {
             return getLockCurrent().subtract(getLockBeginn());
-        } else
+        } else {
             return getLockEnd().subtract(getLockBeginn());
+        }
     }
 
     public BigDecimal getSumDiff() {
         if (year.equals(Tools.getLastDate().getYear())) {
             return getSumCurrent().subtract(getSumBeginn());
-        } else
+        } else {
             return getSumEnd().subtract(getSumBeginn());
+        }
     }
 
     public BigDecimal getDispCurrent() {
         if (dispCurrent == null) {
             dispCurrent = BigDecimal.ZERO;
-            for (Konto k : KontoDAO.instance().getAll()) {
-                if (k.isValid() && k.isDisposable())
+            Vector<Konto> konten = KontoDAO.instance().getAll();
+            for (Konto k : konten) {
+                if (k.isValid() && k.isDisposable()) {
                     dispCurrent = dispCurrent.add(k.getSaldo());
+                }
             }
         }
         return dispCurrent;
@@ -144,9 +151,11 @@ public class LogicJahrUEKapital {
     public BigDecimal getLockCurrent() {
         if (lockCurrent == null) {
             lockCurrent = BigDecimal.ZERO;
-            for (Konto k : KontoDAO.instance().getAll()) {
-                if (k.isValid() && !k.isDisposable())
+            Vector<Konto> konten = KontoDAO.instance().getAll();
+            for (Konto k : konten) {
+                if (k.isValid() && !k.isDisposable()) {
                     lockCurrent = lockCurrent.add(k.getSaldo());
+                }
             }
         }
         return lockCurrent;

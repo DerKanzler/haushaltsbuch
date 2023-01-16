@@ -20,9 +20,9 @@ import haushaltsbuch.logic.admin.LogicKontoAdmin;
 
 /**
  * This class displays the "Konten verwalten" screen.
- * 
+ *
  * You can edit and add accounts here.
- * 
+ *
  * @author pk
  *
  */
@@ -37,12 +37,12 @@ public class UIKontoAdmin extends UIAbstractAdmin implements SelectionListener {
     private Button addButton;
 
     private LogicKontoAdmin logic = LogicKontoAdmin.instance();
-    private Vector<UIKontoComposite> accountsComposites = new Vector<UIKontoComposite>();
+    private Vector<UIKontoComposite> accountsComposites = new Vector<>();
 
     /**
      * Constructor: Since UIKonto extends Composite the super constructor is called here with the given arguments.
      * Builds the visible user interface. Uses GridLayout with 3 columns.
-     * 
+     *
      * @param Composite
      * @param Integer
      */
@@ -71,6 +71,7 @@ public class UIKontoAdmin extends UIAbstractAdmin implements SelectionListener {
         addButton.addSelectionListener(this);
     }
 
+    @Override
     public void lock() {
         for (UIKontoComposite ac : accountsComposites) {
             ac.lock();
@@ -79,23 +80,27 @@ public class UIKontoAdmin extends UIAbstractAdmin implements SelectionListener {
         addButton.setEnabled(false);
     }
 
+    @Override
     public void unlock() {
         UIKontoComposite delAC = null;
         for (UIKontoComposite ac : accountsComposites) {
             ac.unlock();
             if (ac.isUsed()) {
-                if (ac.isNew())
+                if (ac.isNew()) {
                     delAC = ac;
-                else
+                } else {
                     ac.discard();
+                }
             }
         }
-        if (delAC != null)
+        if (delAC != null) {
             remove(delAC);
+        }
         this.getShell().setModified(false);
         addButton.setEnabled(true);
     }
 
+    @Override
     public void remove(Composite ac) {
         accountsComposites.remove(ac);
         ac.dispose();
@@ -103,13 +108,15 @@ public class UIKontoAdmin extends UIAbstractAdmin implements SelectionListener {
         sComp.setOrigin(0, 0);
     }
 
+    @Override
     public void resize() {
         sComp.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     }
 
+    @Override
     public void update() {
         content = new Composite(sComp, SWT.NONE);
-        accountsComposites = new Vector<UIKontoComposite>();
+        accountsComposites = new Vector<>();
 
         buildAccountsList();
         sComp.setContent(content);
@@ -126,7 +133,8 @@ public class UIKontoAdmin extends UIAbstractAdmin implements SelectionListener {
         layout.verticalSpacing = 0;
         content.setLayout(layout);
 
-        for (Konto k : logic.getAll()) {
+        Vector<Konto> konten = logic.getAll();
+        for (Konto k : konten) {
             UIKontoComposite uiKontoComposite = new UIKontoComposite(content, SWT.NONE);
             uiKontoComposite.buildUI(k);
             uiKontoComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -137,11 +145,13 @@ public class UIKontoAdmin extends UIAbstractAdmin implements SelectionListener {
     /**
      * Does nothing.
      */
+    @Override
     public void widgetDefaultSelected(SelectionEvent se) {}
 
     /**
      * Catches the SelectionEvent when a button is clicked.
      */
+    @Override
     public void widgetSelected(SelectionEvent se) {
         if (se.getSource().equals(addButton)) {
             UIKontoComposite uiKontoComposite = new UIKontoComposite(content, SWT.NONE);

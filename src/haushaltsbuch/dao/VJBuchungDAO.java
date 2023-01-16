@@ -35,14 +35,15 @@ public class VJBuchungDAO {
             }
             return buchungList;
         } catch (Exception e) {
-            return new Vector<Buchung>();
+            return new Vector<>();
         }
     }
 
     public HashMap<Integer, Buchung> getMap() {
         if (buchungMap == null) {
-            buchungMap = new HashMap<Integer, Buchung>();
-            for (Buchung b : getAll()) {
+            buchungMap = new HashMap<>();
+            Vector<Buchung> buchungen = getAll();
+            for (Buchung b : buchungen) {
                 buchungMap.put(b.getBuchung(), b);
             }
         }

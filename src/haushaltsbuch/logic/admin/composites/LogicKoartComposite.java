@@ -15,10 +15,12 @@ public class LogicKoartComposite {
             if (KostenartDAO.instance().saveOrUpdate(k)) {
                 if (DB.instance().commit()) {
                     return true;
-                } else
+                } else {
                     return false;
-            } else
+                }
+            } else {
                 return false;
+            }
         } catch (RuntimeException re) {
             throw new RuntimeException("Dieses Kostenartkürzel gibt es schon!");
         }
@@ -29,8 +31,9 @@ public class LogicKoartComposite {
     }
 
     public Vector<Kostenartgruppe> getCorrespondingKoartgrp(String s) {
-        Vector<Kostenartgruppe> data = new Vector<Kostenartgruppe>();
-        for (Kostenartgruppe k : KostenartgruppeDAO.instance().getAll()) {
+        Vector<Kostenartgruppe> data = new Vector<>();
+        Vector<Kostenartgruppe> kostenartenGruppen = KostenartgruppeDAO.instance().getAll();
+        for (Kostenartgruppe k : kostenartenGruppen) {
             if (k.getKoartgrpkat().equals(s)) {
                 data.add(k);
             }

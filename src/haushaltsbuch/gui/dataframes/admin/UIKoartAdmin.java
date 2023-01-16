@@ -20,9 +20,9 @@ import haushaltsbuch.logic.admin.LogicKoartAdmin;
 
 /**
  * This class displays the "Kostenart verwalten" screen.
- * 
+ *
  * You can edit and add "Kostenarten" here.
- * 
+ *
  * @author pk
  *
  */
@@ -37,12 +37,12 @@ public class UIKoartAdmin extends UIAbstractAdmin implements SelectionListener {
     private Composite content;
 
     private LogicKoartAdmin logic = LogicKoartAdmin.instance();
-    private Vector<UIKoartComposite> costTypesComposites = new Vector<UIKoartComposite>();
+    private Vector<UIKoartComposite> costTypesComposites = new Vector<>();
 
     /**
      * Constructor: Since UIKonto extends Composite the super constructor is called here with the given arguments.
      * Builds the visible user interface. Uses GridLayout with 3 columns.
-     * 
+     *
      * @param Composite
      * @param Integer
      */
@@ -71,6 +71,7 @@ public class UIKoartAdmin extends UIAbstractAdmin implements SelectionListener {
         addButton.addSelectionListener(this);
     }
 
+    @Override
     public void lock() {
         for (UIKoartComposite ctc : costTypesComposites) {
             ctc.lock();
@@ -79,20 +80,23 @@ public class UIKoartAdmin extends UIAbstractAdmin implements SelectionListener {
         addButton.setEnabled(false);
     }
 
+    @Override
     public void unlock() {
         try {
             UIKoartComposite delCTC = null;
             for (UIKoartComposite ctc : costTypesComposites) {
                 ctc.unlock();
                 if (ctc.isUsed()) {
-                    if (ctc.isNew())
+                    if (ctc.isNew()) {
                         delCTC = ctc;
-                    else
+                    } else {
                         ctc.discard();
+                    }
                 }
             }
-            if (delCTC != null)
+            if (delCTC != null) {
                 remove(delCTC);
+            }
             this.getShell().setModified(false);
             addButton.setEnabled(true);
         } catch (Exception e) {
@@ -100,6 +104,7 @@ public class UIKoartAdmin extends UIAbstractAdmin implements SelectionListener {
         }
     }
 
+    @Override
     public void remove(Composite ctc) {
         costTypesComposites.remove(ctc);
         ctc.dispose();
@@ -107,13 +112,15 @@ public class UIKoartAdmin extends UIAbstractAdmin implements SelectionListener {
         sComp.setOrigin(0, 0);
     }
 
+    @Override
     public void resize() {
         sComp.setMinSize(content.computeSize(SWT.DEFAULT, SWT.DEFAULT));
     }
 
+    @Override
     public void update() {
         content = new Composite(sComp, SWT.NONE);
-        costTypesComposites = new Vector<UIKoartComposite>();
+        costTypesComposites = new Vector<>();
 
         buildCostTypesList();
         sComp.setContent(content);
@@ -130,7 +137,8 @@ public class UIKoartAdmin extends UIAbstractAdmin implements SelectionListener {
         layout.verticalSpacing = 0;
         content.setLayout(layout);
 
-        for (Kostenart koart : logic.getAll()) {
+        Vector<Kostenart> kostenarten = logic.getAll();
+        for (Kostenart koart : kostenarten) {
             UIKoartComposite koartComposite = new UIKoartComposite(content, SWT.NONE);
             koartComposite.buildUI(koart);
             koartComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -141,11 +149,13 @@ public class UIKoartAdmin extends UIAbstractAdmin implements SelectionListener {
     /**
      * Does nothing.
      */
+    @Override
     public void widgetDefaultSelected(SelectionEvent se) {}
 
     /**
      * Catches the SelectionEvent when a button is clicked.
      */
+    @Override
     public void widgetSelected(SelectionEvent se) {
         if (se.getSource().equals(addButton)) {
             UIKoartComposite koartComposite = new UIKoartComposite(content, SWT.NONE);

@@ -12,7 +12,7 @@ public class KostenartsaldoDAO {
 
     private KostenartsaldoDB db = new KostenartsaldoDB();
     private static KostenartsaldoDAO instance;
-    private HashMap<LocalDate, Vector<Kostenartsaldo>> koartsaldoMap = new HashMap<LocalDate, Vector<Kostenartsaldo>>();
+    private HashMap<LocalDate, Vector<Kostenartsaldo>> koartsaldoMap = new HashMap<>();
 
     private KostenartsaldoDAO() {
         // nothing to do
@@ -46,7 +46,7 @@ public class KostenartsaldoDAO {
                 if (koartsaldoMap.containsKey(ks.getKoartsalddat())) {
                     koartsaldi = koartsaldoMap.get(ks.getKoartsalddat());
                 } else {
-                    koartsaldi = new Vector<Kostenartsaldo>();
+                    koartsaldi = new Vector<>();
                 }
                 koartsaldi.add(ks);
                 koartsaldoMap.put(ks.getKoartsalddat(), koartsaldi);
@@ -61,9 +61,11 @@ public class KostenartsaldoDAO {
 
     public Kostenartsaldo find(Kostenart koart, LocalDate date) {
         try {
-            for (Kostenartsaldo ks : getKostenartsaldi(date)) {
-                if (koart.equals(ks.getKoart()))
+            Vector<Kostenartsaldo> kostenartsaldi = getKostenartsaldi(date);
+            for (Kostenartsaldo ks : kostenartsaldi) {
+                if (koart.equals(ks.getKoart())) {
                     return ks;
+                }
             }
             return new Kostenartsaldo();
         } catch (Exception e) {
@@ -72,7 +74,7 @@ public class KostenartsaldoDAO {
     }
 
     public void clear() {
-        koartsaldoMap = new HashMap<LocalDate, Vector<Kostenartsaldo>>();
+        koartsaldoMap = new HashMap<>();
     }
 
 }

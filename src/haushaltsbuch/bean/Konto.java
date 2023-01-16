@@ -19,8 +19,9 @@ public class Konto {
     public String toString() {
         if (getKuerzel() == null) {
             return "";
-        } else
+        } else {
             return getKuerzel();
+        }
     }
 
     public Integer getKonto() {
@@ -95,18 +96,12 @@ public class Konto {
         this.saldo = saldo;
     }
 
-    public Boolean isValid() {
-        if (getKzog().equals("O")) {
-            return true;
-        } else
-            return false;
+    public boolean isValid() {
+        return "O".equals(getKzog());
     }
 
-    public Boolean isDisposable() {
-        if (getKtotyp().equals("V")) {
-            return true;
-        } else
-            return false;
+    public boolean isDisposable() {
+        return "V".equals(getKtotyp());
     }
 
 }

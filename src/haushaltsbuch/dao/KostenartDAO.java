@@ -33,14 +33,15 @@ public class KostenartDAO {
             }
             return kostenartList;
         } catch (Exception e) {
-            return new Vector<Kostenart>();
+            return new Vector<>();
         }
     }
 
     public HashMap<Integer, Kostenart> getMap() {
         if (kostenartMap == null) {
-            kostenartMap = new HashMap<Integer, Kostenart>();
-            for (Kostenart k : getAll()) {
+            kostenartMap = new HashMap<>();
+            Vector<Kostenart> kostenarten = getAll();
+            for (Kostenart k : kostenarten) {
                 kostenartMap.put(k.getKoart(), k);
             }
         }
