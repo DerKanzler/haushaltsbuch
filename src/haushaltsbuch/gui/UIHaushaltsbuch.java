@@ -32,349 +32,356 @@ import haushaltsbuch.util.GUITools;
 
 public class UIHaushaltsbuch {
 
-	private Shell shell;
+    private Shell shell;
 
-	private UIMainFrame mainFrame;
-	private UIProgressFrame progressFrame;
+    private UIMainFrame mainFrame;
+    private UIProgressFrame progressFrame;
 
-	private Menu menu, applicationMenu, toolsMenu;
-	private MenuItem applicationMenuItem, applicationCloseItem, toolsMenuItem, toolsBackupItem, toolsRestoreItem,
-			toolsSettingsItem, aboutItem;
+    private Menu menu, applicationMenu, toolsMenu;
+    private MenuItem applicationMenuItem, applicationCloseItem, toolsMenuItem, toolsBackupItem, toolsRestoreItem,
+            toolsSettingsItem, aboutItem;
 
-	private ResourceBundle res = ResourceBundle.getBundle("haushaltsbuch.conf.Strings");
-	private LogicMain logic = LogicMain.instance();
+    private ResourceBundle res = ResourceBundle.getBundle("haushaltsbuch.conf.Strings");
+    private LogicMain logic = LogicMain.instance();
 
-	public UIHaushaltsbuch() {
-		if (!logic.userAvailable()) {
-			createFrame();
-			GUITools.enableMenu(Display.getDefault().getSystemMenu(), false);
-			if (new UIUserDialog(shell).open() == IDialogConstants.OK_ID) {
-				BenutzerDAO.instance().clear();
-				reset();
-				createMenuBar();
-				revealFrame();
-			} else
-				exit();
-		} else if (new UILoginFrame().open()) {
-			createFrame();
-			reset();
-			createMenuBar();
-			revealFrame();
-		}
-	}
+    public UIHaushaltsbuch() {
+        if (!logic.userAvailable()) {
+            createFrame();
+            GUITools.enableMenu(Display.getDefault().getSystemMenu(), false);
+            if (new UIUserDialog(shell).open() == IDialogConstants.OK_ID) {
+                BenutzerDAO.instance().clear();
+                reset();
+                createMenuBar();
+                revealFrame();
+            } else
+                exit();
+        } else if (new UILoginFrame().open()) {
+            createFrame();
+            reset();
+            createMenuBar();
+            revealFrame();
+        }
+    }
 
-	public void reset() {
-		if (mainFrame != null && !mainFrame.isDisposed())
-			mainFrame.dispose();
-		if (progressFrame != null && !progressFrame.isDisposed())
-			progressFrame.dispose();
-		res = ResourceBundle.getBundle("haushaltsbuch.conf.Strings", logic.getUser().getFormat());
-		shell.setText(res.getString("Application") + " " + logic.getUser().getName());
-		mainFrame = new UIMainFrame(shell, SWT.NONE, this);
-		shell.layout();
-	}
+    public void reset() {
+        if (mainFrame != null && !mainFrame.isDisposed())
+            mainFrame.dispose();
+        if (progressFrame != null && !progressFrame.isDisposed())
+            progressFrame.dispose();
+        res = ResourceBundle.getBundle("haushaltsbuch.conf.Strings", logic.getUser().getFormat());
+        shell.setText(res.getString("Application") + " " + logic.getUser().getName());
+        mainFrame = new UIMainFrame(shell, SWT.NONE, this);
+        shell.layout();
+    }
 
-	public void exit() {
-		if (checkState())
-			shell.dispose();
-	}
+    public void exit() {
+        if (checkState())
+            shell.dispose();
+    }
 
-	public Boolean checkState() {
-		if (shell.getModified()) {
-			MessageBox box = new MessageBox(shell,
-					SWT.ICON_QUESTION | SWT.PRIMARY_MODAL | SWT.YES | SWT.NO | SWT.SHEET);
-			box.setMessage(res.getString("Continue"));
-			return box.open() == SWT.YES;
-		} else
-			return true;
-	}
+    public Boolean checkState() {
+        if (shell.getModified()) {
+            MessageBox box = new MessageBox(shell,
+                    SWT.ICON_QUESTION | SWT.PRIMARY_MODAL | SWT.YES | SWT.NO | SWT.SHEET);
+            box.setMessage(res.getString("Continue"));
+            return box.open() == SWT.YES;
+        } else
+            return true;
+    }
 
-	/**
-	 * Creates the frame and sets the application name as well as the minimum size.
-	 * The shell created here is more or less the mother of all the controls and
-	 * widgets.
-	 */
-	private void createFrame() {
-		shell = new Shell(Display.getDefault());
-		shell.setMinimumSize(1000, 750);
-		shell.setText(res.getString("Application"));
-		shell.setModified(false);
+    /**
+     * Creates the frame and sets the application name as well as the minimum size.
+     * The shell created here is more or less the mother of all the controls and
+     * widgets.
+     */
+    private void createFrame() {
+        shell = new Shell(Display.getDefault());
+        shell.setMinimumSize(1000, 750);
+        shell.setText(res.getString("Application"));
+        shell.setModified(false);
 
-		shell.addShellListener(new ShellAdapter() {
-			public void shellClosed(ShellEvent se) {
-				se.doit = checkState();
-			}
-		});
+        shell.addShellListener(new ShellAdapter() {
 
-		shell.setLayout(new FillLayout(SWT.VERTICAL));
-	}
+            public void shellClosed(ShellEvent se) {
+                se.doit = checkState();
+            }
+        });
 
-	/**
-	 * Finally opens the shell, hence opens the frame. Runs as long as the shell is
-	 * disposed. If it is disposed the application is exited and the database
-	 * connection is disconnected.
-	 */
-	private void revealFrame() {
-		shell.open();
-		while (shell != null && shell.isDisposed() == false) {
-			Display display = Display.getDefault();
-			if (display != null && display.readAndDispatch() == false)
-				display.sleep();
-		}
-		Display.getDefault().dispose();
-		LogicMain.instance().exit();
-	}
+        shell.setLayout(new FillLayout(SWT.VERTICAL));
+    }
 
-	/**
-	 * Creates the menubar with the main entry points.
-	 */
-	private void createMenuBar() {
-		menu = new Menu(shell, SWT.BAR);
-		shell.setMenuBar(menu);
-		if (GUITools.isMac()) {
-			GUITools.enableMenu(Display.getDefault().getSystemMenu(), true);
-			try {
-				// new SparkleActivator().start();
-			} catch (Exception e) {
-				// do nothing
-			}
-			MenuItem pref = GUITools.getItem(Display.getDefault().getSystemMenu(), SWT.ID_PREFERENCES);
-			pref.addListener(SWT.Selection, new Listener() {
+    /**
+     * Finally opens the shell, hence opens the frame. Runs as long as the shell is
+     * disposed. If it is disposed the application is exited and the database
+     * connection is disconnected.
+     */
+    private void revealFrame() {
+        shell.open();
+        while (shell != null && shell.isDisposed() == false) {
+            Display display = Display.getDefault();
+            if (display != null && display.readAndDispatch() == false)
+                display.sleep();
+        }
+        Display.getDefault().dispose();
+        LogicMain.instance().exit();
+    }
 
-				public void handleEvent(Event e) {
-					new PreferencesAction().run();
-				}
+    /**
+     * Creates the menubar with the main entry points.
+     */
+    private void createMenuBar() {
+        menu = new Menu(shell, SWT.BAR);
+        shell.setMenuBar(menu);
+        if (GUITools.isMac()) {
+            GUITools.enableMenu(Display.getDefault().getSystemMenu(), true);
+            try {
+                // new SparkleActivator().start();
+            } catch (Exception e) {
+                // do nothing
+            }
+            MenuItem pref = GUITools.getItem(Display.getDefault().getSystemMenu(), SWT.ID_PREFERENCES);
+            pref.addListener(SWT.Selection, new Listener() {
 
-			});
-			MenuItem about = GUITools.getItem(Display.getDefault().getSystemMenu(), SWT.ID_ABOUT);
-			about.addListener(SWT.Selection, new Listener() {
+                public void handleEvent(Event e) {
+                    new PreferencesAction().run();
+                }
 
-				public void handleEvent(Event e) {
-					new AboutAction().run();
-				}
+            });
+            MenuItem about = GUITools.getItem(Display.getDefault().getSystemMenu(), SWT.ID_ABOUT);
+            about.addListener(SWT.Selection, new Listener() {
 
-			});
-		} else {
-			applicationMenuItem = new MenuItem(menu, SWT.CASCADE);
-			applicationMenuItem.setText(res.getString("Application"));
-			createApplicationMenu();
-		}
-		toolsMenuItem = new MenuItem(menu, SWT.CASCADE);
-		toolsMenuItem.setText(res.getString("Tools"));
-		createToolsMenu();
-	}
+                public void handleEvent(Event e) {
+                    new AboutAction().run();
+                }
 
-	/**
-	 * Creates the menu for the 'Application' menubar entry
-	 */
-	private void createApplicationMenu() {
-		applicationMenu = new Menu(shell, SWT.DROP_DOWN);
-		applicationMenuItem.setMenu(applicationMenu);
+            });
+        } else {
+            applicationMenuItem = new MenuItem(menu, SWT.CASCADE);
+            applicationMenuItem.setText(res.getString("Application"));
+            createApplicationMenu();
+        }
+        toolsMenuItem = new MenuItem(menu, SWT.CASCADE);
+        toolsMenuItem.setText(res.getString("Tools"));
+        createToolsMenu();
+    }
 
-		aboutItem = new MenuItem(applicationMenu, SWT.PUSH);
-		aboutItem.setText(res.getString("About"));
-		aboutItem.addListener(SWT.Selection, new Listener() {
+    /**
+     * Creates the menu for the 'Application' menubar entry
+     */
+    private void createApplicationMenu() {
+        applicationMenu = new Menu(shell, SWT.DROP_DOWN);
+        applicationMenuItem.setMenu(applicationMenu);
 
-			public void handleEvent(Event e) {
-				new AboutAction().run();
-			}
+        aboutItem = new MenuItem(applicationMenu, SWT.PUSH);
+        aboutItem.setText(res.getString("About"));
+        aboutItem.addListener(SWT.Selection, new Listener() {
 
-		});
+            public void handleEvent(Event e) {
+                new AboutAction().run();
+            }
 
-		new Separator().fill(applicationMenu, 1);
+        });
 
-		applicationCloseItem = new MenuItem(applicationMenu, SWT.PUSH);
-		applicationCloseItem.setText(res.getString("Quit"));
-		applicationCloseItem.addListener(SWT.Selection, new Listener() {
+        new Separator().fill(applicationMenu, 1);
 
-			public void handleEvent(Event e) {
-				exit();
-			}
+        applicationCloseItem = new MenuItem(applicationMenu, SWT.PUSH);
+        applicationCloseItem.setText(res.getString("Quit"));
+        applicationCloseItem.addListener(SWT.Selection, new Listener() {
 
-		});
-	}
+            public void handleEvent(Event e) {
+                exit();
+            }
 
-	/**
-	 * Creates the menu for the 'Edit' menubar entry
-	 */
-	private void createToolsMenu() {
-		toolsMenu = new Menu(shell, SWT.DROP_DOWN);
-		toolsMenuItem.setMenu(toolsMenu);
+        });
+    }
 
-		toolsBackupItem = new MenuItem(toolsMenu, SWT.PUSH);
-		toolsBackupItem.setText(res.getString("Backup"));
-		toolsBackupItem.addListener(SWT.Selection, new Listener() {
+    /**
+     * Creates the menu for the 'Edit' menubar entry
+     */
+    private void createToolsMenu() {
+        toolsMenu = new Menu(shell, SWT.DROP_DOWN);
+        toolsMenuItem.setMenu(toolsMenu);
 
-			public void handleEvent(Event e) {
-				if (checkState()) {
-					mainFrame.getDataFrame().deactivateDataFrame();
-					shell.setModified(false);
+        toolsBackupItem = new MenuItem(toolsMenu, SWT.PUSH);
+        toolsBackupItem.setText(res.getString("Backup"));
+        toolsBackupItem.addListener(SWT.Selection, new Listener() {
 
-					FileDialog backupDialog = new FileDialog(shell, SWT.SAVE | SWT.SHEET);
-					backupDialog.setFilterNames(new String[] { res.getString("ZipFiles") });
-					backupDialog.setFilterExtensions(new String[] { "*.zip" });
-					backupDialog.setFileName(new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".zip");
-					backupDialog.setOverwrite(true);
-					final String file = backupDialog.open();
+            public void handleEvent(Event e) {
+                if (checkState()) {
+                    mainFrame.getDataFrame().deactivateDataFrame();
+                    shell.setModified(false);
 
-					if (file != null) {
-						mainFrame.dispose();
-						progressFrame = new UIProgressFrame(shell, HB.BACKUP_DB);
-						toolsMenu.setEnabled(false);
-						if (!GUITools.isMac())
-							applicationMenu.setEnabled(false);
-						shell.layout();
+                    FileDialog backupDialog = new FileDialog(shell, SWT.SAVE | SWT.SHEET);
+                    backupDialog.setFilterNames(new String[] { res.getString("ZipFiles") });
+                    backupDialog.setFilterExtensions(new String[] { "*.zip" });
+                    backupDialog.setFileName(new SimpleDateFormat("yyyy-MM-dd").format(new Date()) + ".zip");
+                    backupDialog.setOverwrite(true);
+                    final String file = backupDialog.open();
 
-						Runnable longJob = new Runnable() {
-							boolean done = false;
+                    if (file != null) {
+                        mainFrame.dispose();
+                        progressFrame = new UIProgressFrame(shell, HB.BACKUP_DB);
+                        toolsMenu.setEnabled(false);
+                        if (!GUITools.isMac())
+                            applicationMenu.setEnabled(false);
+                        shell.layout();
 
-							public void run() {
-								Thread thread = new Thread(new Runnable() {
-									Boolean b;
+                        Runnable longJob = new Runnable() {
 
-									public void run() {
-										try {
-											b = logic.backupDatabase(file);
-										} catch (Exception e) {
-											b = false;
-										}
-										Display.getDefault().asyncExec(new Runnable() {
-											public void run() {
-												MessageBox mb = new MessageBox(shell,
-														SWT.OK | SWT.ICON_INFORMATION | SWT.SHEET);
-												if (b)
-													mb.setMessage(res.getString("BackupSuccessfull"));
-												else
-													mb.setMessage(res.getString("BackupFailed"));
-												if (mb.open() == SWT.OK) {
-													reset();
-													toolsMenu.setEnabled(true);
-													if (!GUITools.isMac())
-														applicationMenu.setEnabled(true);
-												}
-											}
-										});
-										done = true;
-									}
-								});
-								thread.start();
-								while (!done && !shell.isDisposed()) {
-									if (!Display.getDefault().readAndDispatch())
-										Display.getDefault().sleep();
-								}
-							}
-						};
-						BusyIndicator.showWhile(Display.getDefault(), longJob);
-					}
-				}
-			}
-		});
+                            boolean done = false;
 
-		toolsRestoreItem = new MenuItem(toolsMenu, SWT.PUSH);
-		toolsRestoreItem.setText(res.getString("Restore"));
-		toolsRestoreItem.addListener(SWT.Selection, new Listener() {
+                            public void run() {
+                                Thread thread = new Thread(new Runnable() {
 
-			public void handleEvent(Event e) {
-				if (checkState()) {
-					mainFrame.getDataFrame().deactivateDataFrame();
-					shell.setModified(false);
+                                    Boolean b;
 
-					FileDialog restoreDialog = new FileDialog(shell, SWT.OPEN | SWT.SHEET);
-					restoreDialog.setFilterNames(new String[] { res.getString("ZipFiles") });
-					restoreDialog.setFilterExtensions(new String[] { "*.zip" });
-					final String file = restoreDialog.open();
+                                    public void run() {
+                                        try {
+                                            b = logic.backupDatabase(file);
+                                        } catch (Exception e) {
+                                            b = false;
+                                        }
+                                        Display.getDefault().asyncExec(new Runnable() {
 
-					if (file != null) {
-						mainFrame.dispose();
-						progressFrame = new UIProgressFrame(shell, HB.RESTORE_DB);
-						toolsMenu.setEnabled(false);
-						if (!GUITools.isMac())
-							applicationMenu.setEnabled(false);
-						shell.layout();
+                                            public void run() {
+                                                MessageBox mb = new MessageBox(shell,
+                                                        SWT.OK | SWT.ICON_INFORMATION | SWT.SHEET);
+                                                if (b)
+                                                    mb.setMessage(res.getString("BackupSuccessfull"));
+                                                else
+                                                    mb.setMessage(res.getString("BackupFailed"));
+                                                if (mb.open() == SWT.OK) {
+                                                    reset();
+                                                    toolsMenu.setEnabled(true);
+                                                    if (!GUITools.isMac())
+                                                        applicationMenu.setEnabled(true);
+                                                }
+                                            }
+                                        });
+                                        done = true;
+                                    }
+                                });
+                                thread.start();
+                                while (!done && !shell.isDisposed()) {
+                                    if (!Display.getDefault().readAndDispatch())
+                                        Display.getDefault().sleep();
+                                }
+                            }
+                        };
+                        BusyIndicator.showWhile(Display.getDefault(), longJob);
+                    }
+                }
+            }
+        });
 
-						Runnable longJob = new Runnable() {
-							boolean done = false;
+        toolsRestoreItem = new MenuItem(toolsMenu, SWT.PUSH);
+        toolsRestoreItem.setText(res.getString("Restore"));
+        toolsRestoreItem.addListener(SWT.Selection, new Listener() {
 
-							public void run() {
-								Thread thread = new Thread(new Runnable() {
-									Boolean b;
+            public void handleEvent(Event e) {
+                if (checkState()) {
+                    mainFrame.getDataFrame().deactivateDataFrame();
+                    shell.setModified(false);
 
-									public void run() {
-										try {
-											b = logic.restoreDatabase(file);
-										} catch (Exception e) {
-											b = false;
-										}
-										Display.getDefault().asyncExec(new Runnable() {
-											public void run() {
-												MessageBox mb = new MessageBox(shell,
-														SWT.OK | SWT.ICON_INFORMATION | SWT.SHEET);
-												if (b)
-													mb.setMessage(res.getString("RestoreSuccessfull"));
-												else
-													mb.setMessage(res.getString("RestoreFailed"));
-												if (mb.open() == SWT.OK) {
-													reset();
-													toolsMenu.setEnabled(true);
-													if (!GUITools.isMac())
-														applicationMenu.setEnabled(true);
-												}
-											}
-										});
-										done = true;
-									}
-								});
-								thread.start();
-								while (!done && !shell.isDisposed()) {
-									if (!Display.getDefault().readAndDispatch())
-										Display.getDefault().sleep();
-								}
-							}
-						};
-						BusyIndicator.showWhile(Display.getDefault(), longJob);
-					}
-				}
-			}
-		});
+                    FileDialog restoreDialog = new FileDialog(shell, SWT.OPEN | SWT.SHEET);
+                    restoreDialog.setFilterNames(new String[] { res.getString("ZipFiles") });
+                    restoreDialog.setFilterExtensions(new String[] { "*.zip" });
+                    final String file = restoreDialog.open();
 
-		if (!GUITools.isMac()) {
-			new Separator().fill(toolsMenu, 2);
+                    if (file != null) {
+                        mainFrame.dispose();
+                        progressFrame = new UIProgressFrame(shell, HB.RESTORE_DB);
+                        toolsMenu.setEnabled(false);
+                        if (!GUITools.isMac())
+                            applicationMenu.setEnabled(false);
+                        shell.layout();
 
-			toolsSettingsItem = new MenuItem(toolsMenu, SWT.PUSH);
-			toolsSettingsItem.setText(res.getString("Preferences"));
-			toolsSettingsItem.addListener(SWT.Selection, new Listener() {
+                        Runnable longJob = new Runnable() {
 
-				public void handleEvent(Event e) {
-					new PreferencesAction().run();
-				}
+                            boolean done = false;
 
-			});
-		}
-	}
+                            public void run() {
+                                Thread thread = new Thread(new Runnable() {
 
-	private class AboutAction extends Action {
+                                    Boolean b;
 
-		public void run() {
-			GUITools.enableMenu(Display.getDefault().getSystemMenu(), false);
-			UIInfo info = new UIInfo(Display.getDefault().getActiveShell());
-			info.open();
-			GUITools.enableMenu(Display.getDefault().getSystemMenu(), true);
-		}
+                                    public void run() {
+                                        try {
+                                            b = logic.restoreDatabase(file);
+                                        } catch (Exception e) {
+                                            b = false;
+                                        }
+                                        Display.getDefault().asyncExec(new Runnable() {
 
-	}
+                                            public void run() {
+                                                MessageBox mb = new MessageBox(shell,
+                                                        SWT.OK | SWT.ICON_INFORMATION | SWT.SHEET);
+                                                if (b)
+                                                    mb.setMessage(res.getString("RestoreSuccessfull"));
+                                                else
+                                                    mb.setMessage(res.getString("RestoreFailed"));
+                                                if (mb.open() == SWT.OK) {
+                                                    reset();
+                                                    toolsMenu.setEnabled(true);
+                                                    if (!GUITools.isMac())
+                                                        applicationMenu.setEnabled(true);
+                                                }
+                                            }
+                                        });
+                                        done = true;
+                                    }
+                                });
+                                thread.start();
+                                while (!done && !shell.isDisposed()) {
+                                    if (!Display.getDefault().readAndDispatch())
+                                        Display.getDefault().sleep();
+                                }
+                            }
+                        };
+                        BusyIndicator.showWhile(Display.getDefault(), longJob);
+                    }
+                }
+            }
+        });
 
-	private class PreferencesAction extends Action {
+        if (!GUITools.isMac()) {
+            new Separator().fill(toolsMenu, 2);
 
-		public void run() {
-			GUITools.enableMenu(Display.getDefault().getSystemMenu(), false);
-			Benutzer b = BenutzerDAO.instance().getUser();
-			UIEinstellungen pop = new UIEinstellungen(Display.getDefault().getActiveShell());
-			if (pop.open(b) == IDialogConstants.OK_ID) {
-				reset();
-			}
-			GUITools.enableMenu(Display.getDefault().getSystemMenu(), true);
-		}
+            toolsSettingsItem = new MenuItem(toolsMenu, SWT.PUSH);
+            toolsSettingsItem.setText(res.getString("Preferences"));
+            toolsSettingsItem.addListener(SWT.Selection, new Listener() {
 
-	}
+                public void handleEvent(Event e) {
+                    new PreferencesAction().run();
+                }
+
+            });
+        }
+    }
+
+    private class AboutAction extends Action {
+
+        public void run() {
+            GUITools.enableMenu(Display.getDefault().getSystemMenu(), false);
+            UIInfo info = new UIInfo(Display.getDefault().getActiveShell());
+            info.open();
+            GUITools.enableMenu(Display.getDefault().getSystemMenu(), true);
+        }
+
+    }
+
+    private class PreferencesAction extends Action {
+
+        public void run() {
+            GUITools.enableMenu(Display.getDefault().getSystemMenu(), false);
+            Benutzer b = BenutzerDAO.instance().getUser();
+            UIEinstellungen pop = new UIEinstellungen(Display.getDefault().getActiveShell());
+            if (pop.open(b) == IDialogConstants.OK_ID) {
+                reset();
+            }
+            GUITools.enableMenu(Display.getDefault().getSystemMenu(), true);
+        }
+
+    }
 
 }
