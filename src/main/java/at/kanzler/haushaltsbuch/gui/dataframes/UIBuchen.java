@@ -401,7 +401,6 @@ public class UIBuchen extends UIAbstractDataFrame
     private void clear() {
         bookingText.setText("");
         amountText.setValue(0);
-        amountText.getControl().setSelection(0);
         koartCombo.getCombo().select(0);
         fromAccountCombo.getCombo().select(0);
         toAccountCombo.getCombo().select(0);
