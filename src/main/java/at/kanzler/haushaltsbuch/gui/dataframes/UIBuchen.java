@@ -15,6 +15,8 @@ import org.eclipse.nebula.widgets.cdatetime.CDateTime;
 import org.eclipse.nebula.widgets.formattedtext.FormattedText;
 import org.eclipse.nebula.widgets.formattedtext.NumberFormatter;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Color;
@@ -237,13 +239,24 @@ public class UIBuchen extends UIAbstractDataFrame
         bookingText.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         bookingText.setTextLimit(52);
 
-        amountText = new FormattedText(group, SWT.RIGHT | SWT.BORDER);
-        amountText.getControl().setLayoutData(new GridData(95, SWT.DEFAULT));
-        NumberFormatter formatter = new NumberFormatter("#,###,###.00", LogicMain.instance().getUser().getFormat());
-        formatter.setFixedLengths(true, true);
-        formatter.setDecimalSeparatorAlwaysShown(true);
-        amountText.setFormatter(formatter);
-        amountText.setValue(0);
+		amountText = new FormattedText(group, SWT.RIGHT | SWT.BORDER);
+		final Text amountTextControl = amountText.getControl();
+		amountTextControl.setLayoutData(new GridData(95, SWT.DEFAULT));
+		NumberFormatter formatter = new NumberFormatter("#,###,###.00", LogicMain.instance().getUser().getFormat());
+		formatter.setFixedLengths(true, true);
+		formatter.setDecimalSeparatorAlwaysShown(true);
+		amountText.setFormatter(formatter);
+		amountText.setValue(0);
+		amountTextControl.addFocusListener(new FocusAdapter() {
+
+			@Override
+			public void focusGained(FocusEvent e) {
+				if (amountText.getValue() instanceof Number value && value.doubleValue() == 0d) {
+					amountTextControl.setSelection(0);
+				}
+			}
+
+		});
 
         koartCombo = new CostTypesCombo(group, SWT.READ_ONLY | SWT.RIGHT | SWT.BORDER);
         koartCombo.update(logic.getKoartList());
@@ -376,22 +389,12 @@ public class UIBuchen extends UIAbstractDataFrame
             b.setBuchtext(bookingText.getText());
         } else
             throw new RuntimeException("Der Buchungstext darf nicht leer sein!");
-        if (amountText.getValue() instanceof Integer) {
-            if ((Integer) amountText.getValue() > 0) {
-                b.setBuchbetr(new BigDecimal((Integer) amountText.getValue()));
-            } else
-                throw new RuntimeException("Der Betrag muss größer als 0 sein!");
-        } else if (amountText.getValue() instanceof Long) {
-            if ((Long) amountText.getValue() > 0) {
-                b.setBuchbetr(new BigDecimal((Long) amountText.getValue()));
-            } else
-                throw new RuntimeException("Der Betrag muss größer als 0 sein!");
-        } else if (amountText.getValue() instanceof Double) {
-            if ((Double) amountText.getValue() > 0) {
-                b.setBuchbetr(new BigDecimal((Double) amountText.getValue()));
-            } else
-                throw new RuntimeException("Der Betrag muss größer als 0 sein!");
-        }
+		if (amountText.getValue() instanceof Number number) {
+			if (number.doubleValue() > 0d) {
+				b.setBuchbetr(BigDecimal.valueOf(number.doubleValue()));
+			} else
+				throw new RuntimeException("Der Betrag muss größer als 0 sein!");
+		}
         b.setKoart(koartCombo.getSelectedCostType());
         b.setKontovon(fromAccountCombo.getSelectedAccount());
         b.setKontonach(toAccountCombo.getSelectedAccount());
