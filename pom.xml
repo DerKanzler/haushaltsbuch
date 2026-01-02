@@ -4,16 +4,16 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>at.kanzler</groupId>
-	<artifactId>at.kanzler.haushaltsbuch</artifactId>
+	<artifactId>haushaltsbuch</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
 
 	<properties>
 		<h2.version>1.4.200</h2.version>
-		<org.eclipse.core.commands.version>3.11.100</org.eclipse.core.commands.version>
-		<org.eclipse.equinox.common.version>3.18.100</org.eclipse.equinox.common.version>
-		<org.eclipse.jface.version>3.31.0</org.eclipse.jface.version>
-		<org.eclipse.osgi.version>3.18.500</org.eclipse.osgi.version>
-		<swt.version>3.124.100</swt.version>
+		<org.eclipse.core.commands.version>3.11.200</org.eclipse.core.commands.version>
+		<org.eclipse.equinox.common.version>3.18.200</org.eclipse.equinox.common.version>
+		<org.eclipse.jface.version>3.32.0</org.eclipse.jface.version>
+		<org.eclipse.osgi.version>3.18.600</org.eclipse.osgi.version>
+		<swt.version>3.124.200</swt.version>
 		<jfreechart.version>1.5.3</jfreechart.version>
 		<jfreechart-swt.version>1.0</jfreechart-swt.version>
 		<swtgraphics2d.version>1.1.0</swtgraphics2d.version>
@@ -27,6 +27,7 @@
 		<lifecycle-mapping.version>1.0.0</lifecycle-mapping.version>
 		<maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
 		<maven-install-plugin.version>3.1.1</maven-install-plugin.version>
+		<maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
 	</properties>
 
 	<dependencies>
@@ -277,6 +278,42 @@
 							<packaging>jar</packaging>
 							<version>${org.eclipse.nebula.widgets.formattedtext.version}</version>
 							<classifier>source</classifier>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>${maven-shade-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>shade</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>
+										at.kanzler.haushaltsbuch.Haushaltsbuch</mainClass>
+								</transformer>
+							</transformers>
+							<minimizeJar>true</minimizeJar>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/*.RSA</exclude>
+									</excludes>
+								</filter>
+							</filters>
+							<finalName>haushaltsbuch</finalName>
 						</configuration>
 					</execution>
 				</executions>

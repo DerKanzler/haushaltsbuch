@@ -1,4 +1,4 @@
-<project name="haushaltsbuch" default="macosx" basedir=".">
+<project name="at.kanzler.haushaltsbuch" default="macosx" basedir=".">
 
 	<property name="src" value="src" />
 	<property name="lib" location="lib" />
@@ -34,7 +34,7 @@
 	<!-- Compile source. -->
 	<target name="compile" depends="clean">
 		<mkdir dir="${classes}" />
-		<javac destdir="${classes}" debug="true" source="1.8" target="1.8" includeAntRuntime="false">
+		<javac destdir="${classes}" debug="true" source="17" target="17" includeAntRuntime="false">
 			<src path="${src}" />
 			<classpath refid="classpath" />
 		</javac>
@@ -50,7 +50,7 @@
 			<fileset file="${res}/haushb.ddl" />
 		</copy>
 
-		<jar destfile="${jar}/haushaltsbuch.jar" basedir="${classes}">
+		<jar destfile="${jar}/at.kanzler.haushaltsbuch.jar" basedir="${classes}">
 			<manifest>
 				<attribute name="Implementation-Version" value="${version.num} (Build ${build.number})" />
 			</manifest>
@@ -59,10 +59,10 @@
 
 	<target name="macosx" description="Create an .app package for MacOSX" depends="jar">
 		<!-- Set this property value to where your JavaApplicationStub is located -->
-		<property name="macosx.stubfile" value="${resources.dir}/universalJavaApplicationStub" />
+<!--		<property name="macosx.stubfile" value="${resources.dir}/universalJavaApplicationStub" />-->
 
 		<!-- This property is set to the path where are the Sparkle framework will be stored inside the package. You should not need to change it -->
-		<property name="sparkle.path" value="Contents/Frameworks/Sparkle.framework" />
+<!--		<property name="sparkle.path" value="Contents/Frameworks/Sparkle.framework" />-->
 
 		<!-- Delete the old .app if it exists -->
 		<delete dir="${dest}/${app.name}.app" quiet="yes" failonerror="false" />
@@ -79,7 +79,7 @@
 			shortname="${app.name}"
 			icon="${resources.dir}/logo.icns"
 			stubfile="${macosx.stubfile}"
-			mainclass="haushaltsbuch.Haushaltsbuch"
+			mainclass="at.kanzler.haushaltsbuch.Haushaltsbuch"
 			usejavaxkey="true" dir="${dest}"
 			jvmversion="1.8+"
 			startonmainthread="true"
@@ -87,156 +87,148 @@
 			supublicdsakeyfile="dsa_pub.pem"
 			sufeedurl="http://derkanzler.ath.cx/update.xml"
 			version="${version.num} (Build ${build.number})"
-			build="${version.num}"
-			jvmarchs="-Djava.library.path=$APP_ROOT/Contents/Resources/">
+			build="${version.num}">
+<!--			jvmarchs="-Djava.library.path=$APP_ROOT/Contents/Resources/"-->
 			
 			<jarfileset dir="${tmp}">
 				<include name="**/*.jar" />
 			</jarfileset>
 			
-			<resourcefileset dir="${lib}">
-				<include name="**/*.dylib" />
-			</resourcefileset>
+<!--			<resourcefileset dir="${lib}">-->
+<!--				<include name="**/*.dylib" />-->
+<!--			</resourcefileset>-->
 		</jarbundler>
 
 		<delete dir="${tmp}" />
 
 		<!-- The Info.plist file inside the .app package must be updated with several Sparkle properties. Set the SUFeedURL property to the URL where your appcast XML file is located. -->
-		<replace file="${dest}/${app.name}.app/Contents/Info.plist">
-			<replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>
-			<replacevalue><![CDATA[<key>SUScheduledCheckInterval</key>
-    <string>86400</string>
-    <key>SUShowReleaseNotes</key>
-    <true/>
-    <key>SUEnableSystemProfiling</key>
-    <false/>
-    <key>SUAllowsAutomaticUpdates</key>
-    <false/>
-    <key>SUEnableAutomaticChecks</key>
-    <false/>
-    <key>CFBundleName</key>]]></replacevalue>
-		</replace>
+<!--		<replace file="${dest}/${app.name}.app/Contents/Info.plist">-->
+<!--			<replacetoken><![CDATA[<key>CFBundleName</key>]]></replacetoken>-->
+<!--			<replacevalue><![CDATA[<key>SUScheduledCheckInterval</key>-->
+<!--    <string>86400</string>-->
+<!--    <key>SUShowReleaseNotes</key>-->
+<!--    <true/>-->
+<!--    <key>SUEnableSystemProfiling</key>-->
+<!--    <false/>-->
+<!--    <key>SUAllowsAutomaticUpdates</key>-->
+<!--    <false/>-->
+<!--    <key>SUEnableAutomaticChecks</key>-->
+<!--    <false/>-->
+<!--    <key>CFBundleName</key>]]></replacevalue>-->
+<!--		</replace>-->
 
-		<xmltask source="${dest}/${app.name}.app/Contents/Info.plist" dest="${dest}/${app.name}.app/Contents/Info.plist">
-			<replace path="//key[text() = 'CFBundleVersion']/following-sibling::string[1]/text()" withText="${build.number}"/>
-		</xmltask>
+<!--		<xmltask source="${dest}/${app.name}.app/Contents/Info.plist" dest="${dest}/${app.name}.app/Contents/Info.plist">-->
+<!--			<replace path="//key[text() = 'CFBundleVersion']/following-sibling::string[1]/text()" withText="${build.number}"/>-->
+<!--		</xmltask>-->
 
-		<mkdir dir="${dest}/${app.name}.app/Contents/Resources/en.lproj" />
-		<mkdir dir="${dest}/${app.name}.app/Contents/Resources/de.lproj" />
+<!--		<mkdir dir="${dest}/${app.name}.app/Contents/Resources/en.lproj" />-->
+<!--		<mkdir dir="${dest}/${app.name}.app/Contents/Resources/de.lproj" />-->
 
-		<exec executable="/usr/bin/codesign" dir="${dest}" failonerror="false" os="Mac OS X">
-			<arg line="-s - --force ${app.name}.app" />
-		</exec>
+<!--		<exec executable="/usr/bin/codesign" dir="${dest}" failonerror="false" os="Mac OS X">-->
+<!--			<arg line="-s -force ${app.name}.app" />-->
+<!--		</exec>-->
 
 		<!-- The Sparkle Framework must also be copied in the application package. -->
-		<mkdir dir="${dest}/${app.name}.app/Contents/Frameworks" />
-		<unzip src="${resources.dir}/Sparkle.framework.zip" dest="${dest}/${app.name}.app/Contents/Frameworks" />
+<!--		<mkdir dir="${dest}/${app.name}.app/Contents/Frameworks" />-->
+<!--		<unzip src="${resources.dir}/Sparkle.framework.zip" dest="${dest}/${app.name}.app/Contents/Frameworks" />-->
 
-		<copy todir="${dest}/${app.name}.app/Contents/Resources/">
-			<fileset dir="${resources.dir}" includes="dsa_pub.pem" />
-		</copy>
+<!--		<copy todir="${dest}/${app.name}.app/Contents/Resources/">-->
+<!--			<fileset dir="${resources.dir}" includes="dsa_pub.pem" />-->
+<!--		</copy>-->
 
 		<!-- The Ant unzip task does not preserve symlinks, so we recreate them. -->
-		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Versions/Current" resource="./A" />
-		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Headers" resource="./Versions/Current/Headers" />
-		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Resources" resource="./Versions/Current/Resources" />
-		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Sparkle" resource="./Versions/Current/Sparkle" />
+<!--		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Versions/Current" resource="./A" />-->
+<!--		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Headers" resource="./Versions/Current/Headers" />-->
+<!--		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Resources" resource="./Versions/Current/Resources" />-->
+<!--		<symlink link="${dest}/${app.name}.app/${sparkle.path}/Sparkle" resource="./Versions/Current/Sparkle" />-->
 
 		<!-- Restore the file permissions to the Sparke relaunch tool. -->
-		<chmod file="${dest}/${app.name}.app/${sparkle.path}/Resources/relaunch" perm="ugo+rx" />
+<!--		<chmod file="${dest}/${app.name}.app/${sparkle.path}/Resources/relaunch" perm="ugo+rx" />-->
 	</target>
 
 	<!-- Create a DMG - This only works on MacOSX (requires hdiutil) -->
 	<target name="dmg" description="Create a DMG package for MacOSX (only works on MacOSX)" depends="macosx">
 		<!-- Set this property value to a directory where you can mount temporarily your images, for example /tmp -->
-		<property name="mountdir" value="/tmp" />
+<!--		<property name="mountdir" value="/tmp" />-->
 
-		<tstamp>
-			<format property="TODAY_US" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" />
-		</tstamp>
+<!--		<tstamp>-->
+<!--			<format property="TODAY_US" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" />-->
+<!--		</tstamp>-->
 
 		<!-- Delete previously created DMG -->
 		<delete file="${app.name}.dmg}" quiet="yes" failonerror="false" />
 
-		<!-- Create a temporary Disk Image -->
-		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-			<arg value="create" />
-			<arg value="-srcfolder" />
-			<arg value="${dest}/${app.name}.app" />
-			<arg value="-volname" />
+		<exec executable="jpackage" os="Mac OS X" failonerror="true">
+			<arg value="-t" />
+			<arg value="dmg" />
+			<arg value="--name" />
 			<arg value="${app.name}" />
-			<arg value="-ov" />
-			<arg value="${dest}/${app.name}-tmp.dmg" />
-			<arg value="-format" />
-			<arg value="UDRW" />
-		</exec>
-
-		<!-- Attach the temporary image -->
-		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-			<arg value="attach" />
-			<arg value="${dest}/${app.name}-tmp.dmg" />
-			<arg value="-mountroot" />
-			<arg value="${mountdir}/" />
+			<arg value="--main-class" />
+			<arg value="at.kanzler.haushaltsbuch.Haushaltsbuch" />
+			<arg value="--input" />
+			<arg value="${resources.dir}" />
+			<arg value="--main-jar" />
+			<arg value="${app.name}.jar" />
 		</exec>
 
 		<!-- Copy the background, the volume icon and DS_Store files -->
-		<mkdir dir="${mountdir}/${app.name}/.background" />
-		<copy file="${resources.dir}/background.png" tofile="${mountdir}/${app.name}/.background/background.png" overwrite="true" />
-		<copy file="${resources.dir}/VolumeIcon.icns" tofile="${mountdir}/${app.name}/.VolumeIcon.icns" overwrite="true" />
-		<copy file="${resources.dir}/DS_Store" tofile="${mountdir}/${app.name}/.DS_Store" overwrite="true" />
+<!--		<mkdir dir="${mountdir}/${app.name}/.background" />-->
+<!--		<copy file="${resources.dir}/background.png" tofile="${mountdir}/${app.name}/.background/background.png" overwrite="true" />-->
+<!--		<copy file="${resources.dir}/VolumeIcon.icns" tofile="${mountdir}/${app.name}/.VolumeIcon.icns" overwrite="true" />-->
+<!--		<copy file="${resources.dir}/DS_Store" tofile="${mountdir}/${app.name}/.DS_Store" overwrite="true" />-->
 
 		<!-- Indicate that we want a custom icon -->
-		<exec executable="/usr/bin/SetFile" os="Mac OS X">
-			<arg value="-a" />
-			<arg value="C" />
-			<arg value="${mountdir}/${app.name}" />
-		</exec>
+<!--		<exec executable="/usr/bin/SetFile" os="Mac OS X">-->
+<!--			<arg value="-a" />-->
+<!--			<arg value="C" />-->
+<!--			<arg value="${mountdir}/${app.name}" />-->
+<!--		</exec>-->
 
 		<!-- Add a symbolic link to the Applications directory -->
-		<symlink link="${mountdir}/${app.name}" resource="/Applications" />
+<!--		<symlink link="${mountdir}/${app.name}" resource="/Applications" />-->
 
 		<!-- Detach the temporary image -->
-		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-			<arg value="detach" />
-			<arg value="${mountdir}/${app.name}" />
-		</exec>
+<!--		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">-->
+<!--			<arg value="detach" />-->
+<!--			<arg value="${mountdir}/${app.name}" />-->
+<!--		</exec>-->
 
 		<!-- Compress it to a new image -->
-		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-			<arg value="convert" />
-			<arg value="${dest}/${app.name}-tmp.dmg" />
-			<arg value="-format" />
-			<arg value="UDZO" />
-			<arg value="-o" />
-			<arg value="${dest}/${app.name}.dmg" />
-		</exec>
+<!--		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">-->
+<!--			<arg value="convert" />-->
+<!--			<arg value="${dest}/${app.name}-tmp.dmg" />-->
+<!--			<arg value="-format" />-->
+<!--			<arg value="UDZO" />-->
+<!--			<arg value="-o" />-->
+<!--			<arg value="${dest}/${app.name}.dmg" />-->
+<!--		</exec>-->
 
-		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">
-			<arg value="internet-enable" />
-			<arg value="-yes" />
-			<arg value="${dest}/${app.name}.dmg" />
-		</exec>
+<!--		<exec executable="/usr/bin/hdiutil" os="Mac OS X" failonerror="true">-->
+<!--			<arg value="internet-enable" />-->
+<!--			<arg value="-yes" />-->
+<!--			<arg value="${dest}/${app.name}.dmg" />-->
+<!--		</exec>-->
 
 		<!-- Delete the temporary image -->
-		<delete file="${dest}/${app.name}-tmp.dmg" quiet="yes" failonerror="false" />
+<!--		<delete file="${dest}/${app.name}-tmp.dmg" quiet="yes" failonerror="false" />-->
 
 		<!-- Sign the image -->
-		<exec dir="." executable="ruby" outputproperty="key">
-			<arg value="${resources.dir}/Sparkle/sign_update.rb" />
-			<arg value="${dest}/${app.name}.dmg" />
-			<arg value="${resources.dir}/dsa_priv.pem" />
-		</exec>
+<!--		<exec dir="." executable="ruby" outputproperty="key">-->
+<!--			<arg value="${resources.dir}/Sparkle/sign_update.rb" />-->
+<!--			<arg value="${dest}/${app.name}.dmg" />-->
+<!--			<arg value="${resources.dir}/dsa_priv.pem" />-->
+<!--		</exec>-->
 
-		<length file="${dest}/${app.name}.dmg" property="app.size" />
+<!--		<length file="${dest}/${app.name}.dmg" property="app.size" />-->
 
-		<xmltask source="${resources.dir}/update.xml" dest="${dest}/update.xml">
-			<replace path="/rss/channel/item/title/text()" withText="Haushaltsbuch ${version.num} (Build ${build.number})" />
-			<replace path="/rss/channel/item/pubDate/text()" withText="${TODAY_US}" />
-			<replace path="/rss/channel/item/enclosure/@sparkle:dsaSignature" withText="${key}" />
-			<replace path="/rss/channel/item/enclosure/@sparkle:version" withText="${build.number}" />
-			<replace path="/rss/channel/item/enclosure/@sparkle:shortVersionString" withText="${version.num}" />
-			<replace path="/rss/channel/item/enclosure/@length" withText="${app.size}" />
-		</xmltask>
+<!--		<xmltask source="${resources.dir}/update.xml" dest="${dest}/update.xml">-->
+<!--			<replace path="/rss/channel/item/title/text()" withText="Haushaltsbuch ${version.num} (Build ${build.number})" />-->
+<!--			<replace path="/rss/channel/item/pubDate/text()" withText="${TODAY_US}" />-->
+<!--			<replace path="/rss/channel/item/enclosure/@sparkle:dsaSignature" withText="${key}" />-->
+<!--			<replace path="/rss/channel/item/enclosure/@sparkle:version" withText="${build.number}" />-->
+<!--			<replace path="/rss/channel/item/enclosure/@sparkle:shortVersionString" withText="${version.num}" />-->
+<!--			<replace path="/rss/channel/item/enclosure/@length" withText="${app.size}" />-->
+<!--		</xmltask>-->
 	</target>
 
 </project>
